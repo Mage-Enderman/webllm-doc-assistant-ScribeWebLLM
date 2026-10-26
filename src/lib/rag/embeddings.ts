@@ -1,16 +1,14 @@
-import { pipeline, env, FeatureExtractionPipeline } from '@xenova/transformers';
+import { pipeline, env } from '@huggingface/transformers';
 
-// Configure transformers.js for pure browser environment
+// Configure transformers for browser environment
 env.allowLocalModels = false;
-env.useBrowserCache = true;
 
-let extractorInstance: FeatureExtractionPipeline | null = null;
-let isLoadingExtractor = false;
-let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
+let extractorInstance: any = null;
+let extractorPromise: Promise<any> | null = null;
 
 export async function getEmbeddingPipeline(
   onProgress?: (progress: number, text: string) => void
-): Promise<FeatureExtractionPipeline> {
+): Promise<any> {
   if (extractorInstance) {
     return extractorInstance;
   }
@@ -18,11 +16,9 @@ export async function getEmbeddingPipeline(
     return extractorPromise;
   }
 
-  isLoadingExtractor = true;
   extractorPromise = (async () => {
     try {
       const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-        quantized: true,
         progress_callback: (item: any) => {
           if (item && item.progress !== undefined && onProgress) {
             onProgress(item.progress / 100, item.file || 'Downloading embedding model...');
@@ -31,8 +27,9 @@ export async function getEmbeddingPipeline(
       });
       extractorInstance = extractor;
       return extractor;
-    } finally {
-      isLoadingExtractor = false;
+    } catch (err) {
+      console.warn('Could not initialize transformers pipeline:', err);
+      throw err;
     }
   })();
 
@@ -54,7 +51,7 @@ export async function generateEmbedding(
     });
     return Array.from(output.data);
   } catch (error) {
-    console.warn('Failed to generate ONNX embedding, falling back to pseudo-semantic vector:', error);
+    console.warn('Using deterministic vectorizer fallback:', error);
     return generateFallbackEmbedding(text);
   }
 }

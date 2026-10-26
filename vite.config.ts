@@ -8,11 +8,14 @@ export default defineConfig({
   worker: {
     format: 'es',
   },
+  resolve: {
+    dedupe: ['@huggingface/transformers'],
+  },
   optimizeDeps: {
-    exclude: ['@mlc-ai/web-llm', '@xenova/transformers'],
+    exclude: ['@mlc-ai/web-llm', '@huggingface/transformers'],
   },
   build: {
     target: 'esnext',
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 2500,
   },
 })
