@@ -27,6 +27,8 @@ interface ChatViewProps {
   modelStatus: ModelStatus;
   onInitializeModel: () => void;
   onDeleteDoc?: (docId: string) => void;
+  initialPrompt?: string | null;
+  onClearInitialPrompt?: () => void;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({
@@ -36,6 +38,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
   modelStatus,
   onInitializeModel,
   onDeleteDoc,
+  initialPrompt,
+  onClearInitialPrompt,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -68,6 +72,13 @@ export const ChatView: React.FC<ChatViewProps> = ({
       setViewingDoc(documents[0]);
     }
   }, [selectedDocId, documents]);
+
+  useEffect(() => {
+    if (initialPrompt) {
+      setInputPrompt(initialPrompt);
+      if (onClearInitialPrompt) onClearInitialPrompt();
+    }
+  }, [initialPrompt, onClearInitialPrompt]);
 
   const handleCitationClick = (cite: CitationItem) => {
     const doc = documents.find((d) => d.id === cite.docId) || selectedDoc || documents[0];

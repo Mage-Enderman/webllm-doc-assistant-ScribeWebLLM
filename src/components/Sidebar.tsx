@@ -16,6 +16,7 @@ import {
   CheckSquare,
   Square,
   FolderOpen,
+  Archive,
 } from 'lucide-react';
 import { DocumentItem } from '../lib/types';
 import { IngestionProgress } from '../lib/ingestion/documentProcessor';
@@ -33,6 +34,7 @@ interface SidebarProps {
   onDeleteDoc: (docId: string) => void;
   onDeleteDocs: (docIds: string[]) => void;
   onClearAllDocs: () => void;
+  onOpenBundleModal: () => void;
   ingestionProgress: IngestionProgress | null;
   isOpen: boolean;
   onClose: () => void;
@@ -51,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onDeleteDoc,
   onDeleteDocs,
   onClearAllDocs,
+  onOpenBundleModal,
   ingestionProgress,
   isOpen,
   onClose,
@@ -171,6 +174,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Paste Note</span>
+            </button>
+
+            <button
+              onClick={onOpenBundleModal}
+              className="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-semibold transition-all border border-slate-200 dark:border-slate-700"
+              title="Backup, export, or import entire knowledge bases with vectors"
+            >
+              <Archive className="h-3.5 w-3.5" />
+              <span>Workspace Packs (.scribe)</span>
             </button>
           </div>
 

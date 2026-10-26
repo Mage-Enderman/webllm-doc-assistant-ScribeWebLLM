@@ -1,7 +1,7 @@
 import React from 'react';
-import { MessageSquare, FileText, BookOpen, Award, Layers, Brain } from 'lucide-react';
+import { MessageSquare, FileText, BookOpen, Award, Layers, Brain, Network } from 'lucide-react';
 
-export type ActiveTab = 'chat' | 'summary' | 'notes' | 'quiz' | 'flashcards' | 'inspector';
+export type ActiveTab = 'chat' | 'summary' | 'notes' | 'quiz' | 'flashcards' | 'graph' | 'inspector';
 
 interface NavigationTabsProps {
   activeTab: ActiveTab;
@@ -49,6 +49,13 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
       icon: Brain,
       badge: 'SM-2',
       desc: 'Spaced repetition memory cards',
+    },
+    {
+      id: 'graph' as ActiveTab,
+      label: 'Concept Graph',
+      icon: Network,
+      badge: 'Mind Map',
+      desc: 'Interactive knowledge map',
     },
     {
       id: 'inspector' as ActiveTab,

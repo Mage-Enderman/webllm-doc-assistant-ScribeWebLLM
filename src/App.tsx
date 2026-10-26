@@ -14,7 +14,9 @@ import { SummaryView } from './components/views/SummaryView';
 import { NotesView } from './components/views/NotesView';
 import { QuizView } from './components/views/QuizView';
 import { FlashcardView } from './components/views/FlashcardView';
+import { ConceptGraphView } from './components/views/ConceptGraphView';
 import { InspectorView } from './components/views/InspectorView';
+import { BundleModal } from './components/workspace/BundleModal';
 import { Menu } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -22,6 +24,8 @@ export const App: React.FC = () => {
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
   const selectedDocId = selectedDocIds.length === 1 ? selectedDocIds[0] : null;
   const [activeTab, setActiveTab] = useState<ActiveTab>('chat');
+  const [bundleModalOpen, setBundleModalOpen] = useState(false);
+  const [chatInitialPrompt, setChatInitialPrompt] = useState<string | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string>(
     AVAILABLE_MODELS.find((m) => m.default)?.id || AVAILABLE_MODELS[0].id
   );
@@ -245,6 +249,7 @@ export const App: React.FC = () => {
           onDeleteDoc={handleDeleteDoc}
           onDeleteDocs={handleDeleteDocs}
           onClearAllDocs={handleClearAllDocs}
+          onOpenBundleModal={() => setBundleModalOpen(true)}
           ingestionProgress={ingestionProgress}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -281,6 +286,8 @@ export const App: React.FC = () => {
                 modelStatus={modelStatus}
                 onInitializeModel={handleInitializeModel}
                 onDeleteDoc={handleDeleteDoc}
+                initialPrompt={chatInitialPrompt}
+                onClearInitialPrompt={() => setChatInitialPrompt(null)}
               />
             )}
 
@@ -324,12 +331,35 @@ export const App: React.FC = () => {
               />
             )}
 
+            {activeTab === 'graph' && (
+              <ConceptGraphView
+                documents={documents}
+                selectedDocId={selectedDocId}
+                selectedDocIds={selectedDocIds}
+                modelStatus={modelStatus}
+                onInitializeModel={handleInitializeModel}
+                onNavigateToChat={(prompt) => {
+                  setChatInitialPrompt(prompt);
+                  setActiveTab('chat');
+                }}
+              />
+            )}
+
             {activeTab === 'inspector' && (
               <InspectorView documents={documents} />
             )}
           </div>
         </main>
       </div>
+
+      {/* Workspace Pack (.scribe) Export & Import Modal */}
+      <BundleModal
+        isOpen={bundleModalOpen}
+        onClose={() => setBundleModalOpen(false)}
+        documents={documents}
+        selectedDocIds={selectedDocIds}
+        onImportSuccess={loadDocumentsAndChunks}
+      />
     </div>
   );
 };
