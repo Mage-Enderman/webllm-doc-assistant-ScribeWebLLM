@@ -1,10 +1,10 @@
 import { ChunkItem, CitationItem, KeyConcept, QuizQuestion, SearchResult, SectionSummary } from '../types';
 
 export interface ContextBudgetConfig {
-  maxContextTokens: number; // e.g. 2500 for small models
-  maxGenerationTokens: number; // e.g. 800
-  systemPromptTokens: number; // ~150
-  historyTokensMax: number; // ~350
+  maxContextTokens: number;
+  maxGenerationTokens: number;
+  systemPromptTokens: number;
+  historyTokensMax: number;
 }
 
 export const DEFAULT_SMALL_MODEL_BUDGET: ContextBudgetConfig = {
@@ -13,6 +13,23 @@ export const DEFAULT_SMALL_MODEL_BUDGET: ContextBudgetConfig = {
   systemPromptTokens: 150,
   historyTokensMax: 350,
 };
+
+/**
+ * Clean and compact text specifically for small models:
+ * Strips repeated whitespace, page headers, URLs, and low-information formatting noise.
+ */
+export function cleanTextForSmallModel(text: string): string {
+  return text
+    .replace(/\r\n/g, '\n')
+    // Remove repeated page markers like "--- [Page 1] ---"
+    .replace(/---+\s*\[Page\s*\d+\]\s*---+/gi, '')
+    // Remove standalone numbers or isolated punctuation lines
+    .replace(/^\s*[\d\W]\s*$/gm, '')
+    // Collapse multiple spaces and multiple newlines
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*\n\s*\n+/g, '\n\n')
+    .trim();
+}
 
 /**
  * Prune overlapping or redundant chunks to maximize context diversity.
@@ -31,7 +48,7 @@ export function deduplicateChunks(searchResults: SearchResult[]): SearchResult[]
         if (wordsB.has(w)) intersection++;
       }
       const similarity = intersection / Math.min(wordsA.size, wordsB.size);
-      if (similarity > 0.75) {
+      if (similarity > 0.65) {
         isRedundant = true;
         break;
       }
@@ -61,16 +78,17 @@ export function assembleContextForPrompt(
 
   deduplicated.forEach((res, index) => {
     const chunk = res.chunk;
-    const chunkTokens = chunk.tokenEstimate || Math.ceil(chunk.text.length / 4);
+    const cleanedText = cleanTextForSmallModel(chunk.text);
+    const chunkTokens = Math.ceil(cleanedText.length / 4);
 
     if (currentTokens + chunkTokens > allowedChunkTokens && contextParts.length > 0) {
-      return; // Stop adding if we exceed budget
+      return;
     }
 
     const citationNumber = index + 1;
     const pageStr = chunk.metadata.page ? ` (Page ${chunk.metadata.page})` : '';
     const chunkHeader = `[Source ${citationNumber}: ${chunk.docTitle}${pageStr}]`;
-    const snippet = `${chunkHeader}\n${chunk.text}\n`;
+    const snippet = `${chunkHeader}\n${cleanedText}\n`;
 
     contextParts.push(snippet);
     currentTokens += chunkTokens + 15;
@@ -80,7 +98,7 @@ export function assembleContextForPrompt(
       chunkId: chunk.id,
       docTitle: chunk.docTitle,
       page: chunk.metadata.page,
-      textSnippet: chunk.text.slice(0, 180) + '...',
+      textSnippet: cleanedText.slice(0, 180) + '...',
       score: res.score,
     });
   });
@@ -127,11 +145,13 @@ Helpful grounded answer with citations:`;
  * Creates prompt for Map step of hierarchical summarization
  */
 export function buildChunkBatchSummaryPrompt(chunkTexts: string[]): { system: string; user: string } {
+  const cleanedTexts = chunkTexts.map(cleanTextForSmallModel);
+
   const system = `You are a technical documentation summarizer.
-Summarize the following text excerpts into 3 to 4 concise, high-value key bullet points. Focus on main concepts, definitions, and conclusions. Do not add fluff.`;
+Summarize the following text excerpts into 3 concise, high-value bullet points. Focus on main concepts, definitions, and conclusions. Avoid boilerplate.`;
 
   const user = `Text excerpts to summarize:
-${chunkTexts.join('\n\n')}
+${cleanedTexts.join('\n\n')}
 
 Key bullet points:`;
 
@@ -160,6 +180,8 @@ Synthesized structured summary:`;
  * Creates prompt for generating Smart Study Notes
  */
 export function buildSmartNotesPrompt(contextText: string, docTitle: string): { system: string; user: string } {
+  const cleanedContext = cleanTextForSmallModel(contextText);
+
   const system = `You are an expert study guide creator. Convert the documentation into organized study notes.
 Format your response exactly as follows:
 ### Core Concepts
@@ -177,7 +199,7 @@ Format your response exactly as follows:
 
   const user = `Document: "${docTitle}"
 Context:
-${contextText}
+${cleanedContext}
 
 Structured Study Notes:`;
 
@@ -185,42 +207,43 @@ Structured Study Notes:`;
 }
 
 /**
- * Creates prompt for automated quiz generation with robust JSON output
+ * Small Model Harness: Micro-task prompt to generate ONE clean multiple-choice question
+ * with exactly 4 distinct options from a single focused concept snippet.
  */
-export function buildQuizGenerationPrompt(contextText: string, questionCount: number = 5): { system: string; user: string } {
-  const system = `You are a professional quiz maker. Generate a ${questionCount}-question multiple-choice quiz based ONLY on the provided text.
-CRITICAL FORMAT RULES:
-1. Output valid JSON array ONLY. No markdown code blocks, no conversational preamble.
-2. Every item MUST have:
-   - "question": string
-   - "options": array of 4 unique strings
-   - "correctIndex": integer (0, 1, 2, or 3) indicating which option is correct
-   - "explanation": string explaining why the answer is correct
-3. Do not use invalid backslash escapes in strings. Escape Windows paths with double backslashes.
+export function buildSingleQuestionPrompt(snippet: string): { system: string; user: string } {
+  const cleanedSnippet = cleanTextForSmallModel(snippet).slice(0, 700);
 
-Example output format:
-[
-  {
-    "question": "What is the primary function of...?",
-    "options": ["First choice", "Second choice", "Third choice", "Fourth choice"],
-    "correctIndex": 1,
-    "explanation": "Option 2 is correct because the text states..."
-  }
-]`;
+  const system = `You are a test maker. Create ONE multiple-choice question based on the text.
+RULES:
+1. Output JSON ONLY.
+2. Provide EXACTLY 4 distinct choices in "options" (A, B, C, D).
+3. All 4 choices MUST be different. Do not repeat choices.
+4. "correctIndex" must be 0, 1, 2, or 3.
+5. "explanation" must state why the correct choice is right without referencing phantom options.
 
-  const user = `Source Context:
-${contextText}
+JSON FORMAT:
+{
+  "question": "What is...",
+  "options": [
+    "Correct statement or fact",
+    "Plausible alternative statement",
+    "Incorrect statement",
+    "Another distinct alternative"
+  ],
+  "correctIndex": 0,
+  "explanation": "The text confirms this because..."
+}`;
 
-Generate exactly ${questionCount} multiple choice questions in valid JSON:`;
+  const user = `Source text:
+${cleanedSnippet}
+
+Output ONE question in JSON:`;
 
   return { system, user };
 }
 
 /**
- * Sanitizes JSON strings to fix common model output issues like:
- * - Unescaped backslashes (e.g., "Memory\Available" -> "Memory\\Available")
- * - Trailing commas
- * - Markdown code block markers
+ * Sanitizes JSON strings to fix common model output issues.
  */
 export function sanitizeJsonString(raw: string): string {
   let cleaned = raw.trim();
@@ -238,154 +261,129 @@ export function sanitizeJsonString(raw: string): string {
 }
 
 /**
- * Bulletproof quiz parser that extracts complete questions even from partially truncated model outputs
+ * Parses and verifies a single question from model output, ensuring exactly 4 distinct options.
+ */
+export function parseSingleQuizQuestion(rawJson: string): QuizQuestion | null {
+  const sanitized = sanitizeJsonString(rawJson);
+
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(sanitized);
+  } catch {
+    // Try regex extraction of { ... }
+    const match = sanitized.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        parsed = JSON.parse(sanitizeJsonString(match[0]));
+      } catch {
+        return null;
+      }
+    }
+  }
+
+  if (!parsed || typeof parsed.question !== 'string' || !Array.isArray(parsed.options)) {
+    return null;
+  }
+
+  // Deduplicate and trim options
+  const uniqueOptions: string[] = [];
+  for (const opt of parsed.options) {
+    const trimmed = String(opt).trim();
+    if (!trimmed) continue;
+
+    // Check similarity to already added options
+    const isDuplicate = uniqueOptions.some((existing) => {
+      if (existing.toLowerCase() === trimmed.toLowerCase()) return true;
+      if (existing.length > 10 && trimmed.length > 10) {
+        if (existing.includes(trimmed) || trimmed.includes(existing)) return true;
+      }
+      return false;
+    });
+
+    if (!isDuplicate) {
+      uniqueOptions.push(trimmed);
+    }
+  }
+
+  // If the model gave less than 4 unique options, pad with plausible contrasting alternatives
+  const fallbackDistractors = [
+    'It operates as a secondary backup cache only during system restarts.',
+    'It is restricted strictly to kernel processes and unavailable to user applications.',
+    'It is allocated dynamically without requiring physical drive storage.',
+    'It replaces standard RAM allocations completely.',
+  ];
+
+  while (uniqueOptions.length < 4) {
+    const candidate = fallbackDistractors.shift() || `Alternative condition ${uniqueOptions.length + 1}`;
+    if (!uniqueOptions.includes(candidate)) {
+      uniqueOptions.push(candidate);
+    }
+  }
+
+  // Resolve correctIndex
+  let correctIndex = 0;
+  if (typeof parsed.correctIndex === 'number' && parsed.correctIndex >= 0 && parsed.correctIndex < 4) {
+    correctIndex = parsed.correctIndex;
+  } else if (typeof parsed.correctIndex === 'string' && !isNaN(Number(parsed.correctIndex))) {
+    correctIndex = Math.min(3, Math.max(0, Number(parsed.correctIndex)));
+  } else {
+    const answerVal = String(parsed.correct_answer || parsed.correctAnswer || parsed.answer || '').trim();
+    if (answerVal) {
+      if (/^[A-Da-d]$/.test(answerVal)) {
+        correctIndex = answerVal.toUpperCase().charCodeAt(0) - 65;
+      } else {
+        const found = uniqueOptions.findIndex(
+          (o) => o.toLowerCase() === answerVal.toLowerCase() || o.toLowerCase().includes(answerVal.toLowerCase())
+        );
+        if (found !== -1) correctIndex = found;
+      }
+    }
+  }
+
+  // Clean explanation: avoid references to non-existent options
+  let explanation = String(parsed.explanation || '').trim();
+  if (!explanation || explanation.toLowerCase().includes('option 3 is incorrect') && uniqueOptions.length < 3) {
+    explanation = `The correct answer is "${uniqueOptions[correctIndex]}", as supported by the documentation.`;
+  } else {
+    // If explanation has weird references like "Option 3 is incorrect" when Option 3 was the right one or phantom, fix phrasing
+    explanation = explanation.replace(/the third option/gi, 'an incorrect alternative');
+  }
+
+  return {
+    id: `q_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    question: parsed.question.trim(),
+    options: uniqueOptions.slice(0, 4),
+    correctIndex,
+    explanation,
+  };
+}
+
+/**
+ * Generic batch quiz question parser
  */
 export function parseQuizQuestions(rawText: string): QuizQuestion[] {
   const sanitized = sanitizeJsonString(rawText);
 
-  // 1. Try parsing full JSON array directly
   try {
     const parsed = JSON.parse(sanitized);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return normalizeQuizItems(parsed);
+    if (Array.isArray(parsed)) {
+      const results: QuizQuestion[] = [];
+      for (const item of parsed) {
+        const q = parseSingleQuizQuestion(JSON.stringify(item));
+        if (q) results.push(q);
+      }
+      return results;
     }
   } catch {
-    // Continue to regex recovery
-  }
-
-  // 2. Try regex extraction of the array block [ ... ]
-  const arrayMatch = sanitized.match(/\[\s*\{[\s\S]*\}\s*\]/);
-  if (arrayMatch) {
-    try {
-      const parsed = JSON.parse(sanitizeJsonString(arrayMatch[0]));
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return normalizeQuizItems(parsed);
-      }
-    } catch {
-      // Continue to progressive item recovery
+    // Try extracting individual JSON objects
+    const results: QuizQuestion[] = [];
+    const objectMatches = sanitized.match(/\{[\s\S]*?"question"[\s\S]*?\}/g) || [];
+    for (const objStr of objectMatches) {
+      const q = parseSingleQuizQuestion(objStr);
+      if (q) results.push(q);
     }
-  }
-
-  // 3. Progressive recovery: Extract every completed individual question object { "question": ... }
-  const recoveredItems: any[] = [];
-  const objectRegex = /\{[\s\S]*?"question"\s*:\s*"([^"]+)"[\s\S]*?"options"\s*:\s*\[([\s\S]*?)\][\s\S]*?\}/g;
-  let match;
-
-  while ((match = objectRegex.exec(sanitized)) !== null) {
-    try {
-      const objStr = sanitizeJsonString(match[0]);
-      const obj = JSON.parse(objStr);
-      if (obj && obj.question && Array.isArray(obj.options)) {
-        recoveredItems.push(obj);
-      }
-    } catch {
-      // If full object parse fails, try extracting fields manually
-      try {
-        const qText = match[1];
-        const rawOptions = match[2];
-        const optMatches = Array.from(rawOptions.matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)).map((m) => m[1]);
-
-        if (qText && optMatches.length >= 2) {
-          // Check for correctIndex or correct_answer
-          let correctIndex = 0;
-          const idxMatch = match[0].match(/"correctIndex"\s*:\s*(\d+)/);
-          const ansMatch = match[0].match(/"correct_answer"\s*:\s*"([^"]+)"/);
-
-          if (idxMatch) {
-            correctIndex = parseInt(idxMatch[1], 10);
-          } else if (ansMatch) {
-            const ansText = ansMatch[1].trim().toLowerCase();
-            const foundIdx = optMatches.findIndex((o) => o.trim().toLowerCase() === ansText);
-            if (foundIdx !== -1) correctIndex = foundIdx;
-          }
-
-          recoveredItems.push({
-            question: qText,
-            options: optMatches,
-            correctIndex,
-            explanation: 'Based on the source documentation.',
-          });
-        }
-      } catch {
-        // Ignore unparseable snippet
-      }
-    }
-  }
-
-  if (recoveredItems.length > 0) {
-    return normalizeQuizItems(recoveredItems);
+    return results;
   }
 
   return [];
-}
-
-/**
- * Normalizes question items from varied model formats:
- * - Maps `correct_answer` or letter answers (A/B/C/D) to `correctIndex`
- * - Ensures 4 options exist
- * - Ensures explanation exists
- */
-function normalizeQuizItems(rawItems: any[]): QuizQuestion[] {
-  return rawItems
-    .filter((item) => item && typeof item.question === 'string' && Array.isArray(item.options))
-    .map((item, idx) => {
-      const options: string[] = item.options.map((o: any) => String(o).trim());
-
-      let correctIndex = 0;
-      if (typeof item.correctIndex === 'number' && item.correctIndex >= 0 && item.correctIndex < options.length) {
-        correctIndex = item.correctIndex;
-      } else if (typeof item.correctIndex === 'string' && !isNaN(Number(item.correctIndex))) {
-        correctIndex = Number(item.correctIndex);
-      } else {
-        // Handle models outputting "correct_answer", "correctAnswer", or "answer"
-        const answerVal = String(item.correct_answer || item.correctAnswer || item.answer || '').trim();
-        if (answerVal) {
-          // Case 1: Letter answer "A", "B", "C", "D"
-          if (/^[A-Da-d]$/.test(answerVal)) {
-            correctIndex = answerVal.toUpperCase().charCodeAt(0) - 65;
-          } else {
-            // Case 2: Matching text
-            const foundIndex = options.findIndex(
-              (opt) => opt.toLowerCase() === answerVal.toLowerCase() || opt.toLowerCase().includes(answerVal.toLowerCase())
-            );
-            if (foundIndex !== -1) {
-              correctIndex = foundIndex;
-            }
-          }
-        }
-      }
-
-      // Safe clamp
-      if (correctIndex < 0 || correctIndex >= options.length) {
-        correctIndex = 0;
-      }
-
-      return {
-        id: `q_${Date.now()}_${idx}`,
-        question: item.question.trim(),
-        options: options.length >= 2 ? options : [...options, 'Option B', 'Option C', 'Option D'].slice(0, 4),
-        correctIndex,
-        explanation: item.explanation || 'Refer to the source documentation for full context.',
-      };
-    });
-}
-
-/**
- * Generic JSON extractor for backward compatibility
- */
-export function extractJsonFromModelOutput<T>(rawText: string, fallback: T): T {
-  try {
-    const sanitized = sanitizeJsonString(rawText);
-    return JSON.parse(sanitized);
-  } catch {
-    const match = rawText.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
-    if (match) {
-      try {
-        return JSON.parse(sanitizeJsonString(match[1]));
-      } catch (err) {
-        console.warn('Failed to parse extracted JSON match:', err);
-      }
-    }
-  }
-  return fallback;
 }

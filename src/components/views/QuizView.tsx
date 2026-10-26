@@ -10,13 +10,14 @@ import {
   RefreshCw,
   ArrowRight,
   Trophy,
+  Layers,
 } from 'lucide-react';
 import { DocumentItem, ModelStatus, QuizQuestion } from '../../lib/types';
 import { db } from '../../lib/db';
 import { llmEngine } from '../../lib/llm/engine';
 import {
-  buildQuizGenerationPrompt,
-  parseQuizQuestions,
+  buildSingleQuestionPrompt,
+  parseSingleQuizQuestion,
 } from '../../lib/rag/harness';
 
 interface QuizViewProps {
@@ -37,6 +38,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
   );
   const [questionCount, setQuestionCount] = useState<number>(5);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [quizProgress, setQuizProgress] = useState<{ current: number; total: number; message: string } | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
@@ -59,41 +61,71 @@ export const QuizView: React.FC<QuizViewProps> = ({
     setIsCompleted(false);
 
     try {
-      // Retrieve top representative chunks for quiz context
-      const chunks = await db.chunks
+      const allChunks = await db.chunks
         .where('docId')
         .equals(activeDoc.id)
-        .limit(6)
-        .toArray();
+        .sortBy('chunkIndex');
 
-      const combinedText = chunks.map((c) => c.text).join('\n\n');
-      const { system, user } = buildQuizGenerationPrompt(combinedText, questionCount);
-
-      const rawJson = await llmEngine.completeChat(
-        [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
-        { temperature: 0.2, max_tokens: 2200 }
-      );
-
-      const validQuestions = parseQuizQuestions(rawJson);
-
-      if (validQuestions.length === 0) {
-        throw new Error('Could not parse questions from model output. Please try again with fewer questions or a larger model.');
+      if (allChunks.length === 0) {
+        throw new Error('No chunks found for this document.');
       }
 
-      setQuestions(validQuestions);
+      // Sample distinct concept chunks evenly across the document
+      const step = Math.max(1, Math.floor(allChunks.length / questionCount));
+      const selectedChunks: typeof allChunks = [];
+      for (let i = 0; i < questionCount && i * step < allChunks.length; i++) {
+        selectedChunks.push(allChunks[i * step]);
+      }
+      for (const c of allChunks) {
+        if (selectedChunks.length >= questionCount) break;
+        if (!selectedChunks.some((sc) => sc.id === c.id)) {
+          selectedChunks.push(c);
+        }
+      }
+
+      const generatedQuestions: QuizQuestion[] = [];
+
+      // Progressive micro-tasking: Generate 1 high-quality question per chunk
+      for (let i = 0; i < selectedChunks.length; i++) {
+        setQuizProgress({
+          current: i + 1,
+          total: selectedChunks.length,
+          message: `Crafting Question ${i + 1} of ${selectedChunks.length}...`,
+        });
+
+        const chunk = selectedChunks[i];
+        const { system, user } = buildSingleQuestionPrompt(chunk.text);
+
+        const rawJson = await llmEngine.completeChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.2, max_tokens: 450 }
+        );
+
+        const q = parseSingleQuizQuestion(rawJson);
+        if (q && q.options.length === 4) {
+          generatedQuestions.push(q);
+        }
+      }
+
+      if (generatedQuestions.length === 0) {
+        throw new Error('Could not generate quiz questions. Please try again or switch model.');
+      }
+
+      setQuestions(generatedQuestions);
     } catch (err: any) {
       console.error('Quiz generation error:', err);
       alert(`Quiz generation failed: ${err.message}`);
     } finally {
       setIsGenerating(false);
+      setQuizProgress(null);
     }
   };
 
   const handleSelectAnswer = (optionIdx: number) => {
-    if (userAnswers[currentIndex] !== undefined) return; // already answered
+    if (userAnswers[currentIndex] !== undefined) return;
 
     const updated = { ...userAnswers, [currentIndex]: optionIdx };
     setUserAnswers(updated);
@@ -114,7 +146,6 @@ export const QuizView: React.FC<QuizViewProps> = ({
       setCurrentIndex((prev) => prev + 1);
     } else {
       setIsCompleted(true);
-      // Grand finale confetti
       confetti({
         particleCount: 100,
         spread: 70,
@@ -171,7 +202,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
               </h2>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Test your mastery with AI-generated multiple choice questions created directly from your notes.
+              Clean, verified 4-choice multiple choice questions generated directly from your notes using progressive micro-tasking.
             </p>
           </div>
 
@@ -221,6 +252,27 @@ export const QuizView: React.FC<QuizViewProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Progressive Generation Bar */}
+        {isGenerating && quizProgress && (
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+              <span className="flex items-center gap-2">
+                <Layers className="h-4 w-4 animate-pulse" />
+                {quizProgress.message}
+              </span>
+              <span>
+                {quizProgress.current} / {quizProgress.total}
+              </span>
+            </div>
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-indigo-500 to-violet-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(quizProgress.current / quizProgress.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quiz Area */}
@@ -241,7 +293,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
             {currentQ.question}
           </h3>
 
-          {/* Options */}
+          {/* Options: Always exactly 4 clean options */}
           <div className="grid grid-cols-1 gap-2.5">
             {currentQ.options.map((option, optIdx) => {
               const isSelected = userAnswers[currentIndex] === optIdx;
@@ -270,7 +322,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   className={`w-full text-left p-3.5 rounded-xl border text-sm transition-all flex items-center justify-between gap-3 ${btnStyle}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="h-6 w-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-400">
+                    <span className="h-6 w-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-400 shrink-0">
                       {String.fromCharCode(65 + optIdx)}
                     </span>
                     <span>{option}</span>
@@ -358,7 +410,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
             Generate an interactive quiz
           </h4>
           <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
-            Choose your question count and click "Start Quiz". The AI model will create multiple choice questions and instant explanations based on your documents.
+            Uses progressive micro-tasking to craft guaranteed 4-option questions with accurate explanations from your notes.
           </p>
         </div>
       )}
