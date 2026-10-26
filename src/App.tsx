@@ -256,9 +256,9 @@ export const App: React.FC = () => {
         />
 
         {/* Content Workspace */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-          {/* Navigation Bar & Mobile menu toggle */}
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 px-3">
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+          {/* Fixed Top Navigation Bar & Mobile menu toggle */}
+          <div className="shrink-0 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 backdrop-blur px-3 z-20">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -267,7 +267,7 @@ export const App: React.FC = () => {
               <Menu className="h-5 w-5" />
             </button>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <NavigationTabs
                 activeTab={activeTab}
                 onTabChange={(tab) => setActiveTab(tab)}
@@ -276,8 +276,8 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Active View */}
-          <div className="flex-1 flex flex-col">
+          {/* Active View Container with internal vertical scroll */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
             {activeTab === 'chat' && (
               <ChatView
                 documents={documents}

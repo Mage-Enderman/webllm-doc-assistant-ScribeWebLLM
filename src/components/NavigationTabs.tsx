@@ -17,28 +17,28 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
   const tabs = [
     {
       id: 'chat' as ActiveTab,
-      label: 'Chat & Q&A',
+      label: 'Chat',
       icon: MessageSquare,
       badge: null,
       desc: 'Ask grounded questions',
     },
     {
       id: 'summary' as ActiveTab,
-      label: 'AI Summaries',
+      label: 'Summaries',
       icon: FileText,
       badge: 'Map-Reduce',
       desc: 'Multi-depth document summaries',
     },
     {
       id: 'notes' as ActiveTab,
-      label: 'Smart Study Notes',
+      label: 'Study Notes',
       icon: BookOpen,
       badge: null,
       desc: 'Extracted concepts & review',
     },
     {
       id: 'quiz' as ActiveTab,
-      label: 'Quiz Arena',
+      label: 'Quiz',
       icon: Award,
       badge: 'Interactive',
       desc: 'Test your understanding',
@@ -52,23 +52,32 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
     },
     {
       id: 'graph' as ActiveTab,
-      label: 'Concept Graph',
+      label: 'Mind Map',
       icon: Network,
-      badge: 'Mind Map',
-      desc: 'Interactive knowledge map',
+      badge: null,
+      desc: 'Interactive concept graph',
     },
     {
       id: 'inspector' as ActiveTab,
-      label: 'Chunk Inspector',
+      label: 'Inspector',
       icon: Layers,
       badge: null,
       desc: 'Vectors & RAG transparency',
     },
   ];
 
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY !== 0) {
+      e.currentTarget.scrollLeft += e.deltaY;
+    }
+  };
+
   return (
-    <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 backdrop-blur px-4">
-      <div className="max-w-7xl mx-auto flex items-center gap-1 sm:gap-2 overflow-x-auto py-2 scrollbar-none">
+    <div className="w-full">
+      <div
+        onWheel={handleWheel}
+        className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1.5 scrollbar-none"
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -77,17 +86,18 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
+              title={tab.desc}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className="h-3.5 w-3.5 shrink-0" />
               <span>{tab.label}</span>
               {tab.badge && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ${
+                  className={`text-[9px] px-1.5 py-0.2 rounded-full font-medium hidden 2xl:inline-flex ${
                     isActive
                       ? 'bg-indigo-500/50 text-indigo-100'
                       : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'

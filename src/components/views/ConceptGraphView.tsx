@@ -584,37 +584,37 @@ export const ConceptGraphView: React.FC<ConceptGraphViewProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
       {/* Graph Toolbar */}
-      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 backdrop-blur px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 z-10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-2xl ring-1 ring-indigo-500/20">
-            <Network className="h-5 w-5" />
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 backdrop-blur px-4 py-2.5 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 z-10 shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-1.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl ring-1 ring-indigo-500/20 shrink-0">
+            <Network className="h-4 w-4" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-slate-900 dark:text-white">
+              <h1 className="text-sm font-bold text-slate-900 dark:text-white truncate">
                 Concept Graph & Mind Map
               </h1>
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 shrink-0">
                 {nodes.length} Nodes • {edges.length} Links
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Interactive knowledge network mapping documents to extracted concepts and themes
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              Knowledge network mapping documents to extracted concepts
             </p>
           </div>
         </div>
 
         {/* Scope and Graph Actions */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {/* Search nodes */}
-          <div className="relative w-44">
+          <div className="relative w-36 sm:w-44">
             <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Highlight concept..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-xs pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-slate-100 dark:bg-slate-800 text-xs pl-8 pr-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
 
@@ -622,7 +622,7 @@ export const ConceptGraphView: React.FC<ConceptGraphViewProps> = ({
           <select
             value={targetScope}
             onChange={(e) => setTargetScope(e.target.value)}
-            className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300"
+            className="px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 max-w-[180px] sm:max-w-[220px] truncate"
           >
             <option value="all">📚 All Documents</option>
             {selectedDocIds.length > 1 && (
@@ -640,10 +640,10 @@ export const ConceptGraphView: React.FC<ConceptGraphViewProps> = ({
             <button
               onClick={handleExtractDeepConcepts}
               disabled={isExtracting}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold shadow-sm transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold shadow-sm transition-all whitespace-nowrap"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              <span>{isExtracting ? 'Analyzing...' : 'Extract Concepts with AI'}</span>
+              <span>{isExtracting ? 'Analyzing...' : 'Extract Concepts'}</span>
             </button>
           )}
 

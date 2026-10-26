@@ -202,7 +202,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   ];
 
   return (
-    <div className="flex-1 flex h-[calc(100vh-8.5rem)] w-full overflow-hidden">
+    <div className="flex-1 flex h-full w-full overflow-hidden">
       {/* Main Chat Column */}
       <div className={`flex-1 flex flex-col p-4 overflow-hidden transition-all duration-300 ${showSplitView ? 'max-w-2xl xl:max-w-3xl' : 'max-w-5xl mx-auto'}`}>
         {/* Scope and controls bar */}
