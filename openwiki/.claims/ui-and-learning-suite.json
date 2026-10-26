@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:c4c5a81a27a7d26f9a37cd61666962bad679e37daf9d061fd4b937659fa100db",
+  "claims": [
+    {
+      "id": "claim_2fae9085e144443290e0cb75b084cbeb",
+      "statement": "ChatView provides streaming answers with interactive source citation chips that open modal previews of the source chunk text.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/views/ChatView.tsx#L55-L115",
+          "version": "repo-lines-v1:sha256:6e0bd88aea358f044b61c0aad574df57300a51bd1da2069264d73af9c248d0f6:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5ZjM3ZTVjMGE4OWIzZjJlMjkyZjBkNjA3N2U4MzAyMzY2YzEzODA2ODMwOTRkZmE2ZjVjNDk5YzU2NWYwYjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQzMWQ0NzMzY2M1MmYxZTEwYmI3OWM0NjE5N2UxYTVhNjY5Njk2ZDVjZjI1NTI5NDBhNjIxMDQ1MzFlOGQ3ZTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_45bb46c5f4df45a1bd3a803d2ba7f4fd",
+      "statement": "QuizView displays 4-option questions with instant visual validation, explanatory boxes, score tallying, and canvas confetti animations.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/views/QuizView.tsx#L125-L210",
+          "version": "repo-lines-v1:sha256:7d06bf12219ded033eda3255fbc03cc84907d646c2bb0ec5112194812d3d45da:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmZWFmNjE4YTZlNGI3MmFkZDNhZmM4YTBhMTNiNmY3NDhlMDg1NTZkMGYyNTVkMjUzOWEzNDViOTVkOThlYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhMGI2YjhlN2VjNmIzYjE4ZWI2YTc1MjE1ZmViOTgwODUxYTU2OWNjZTgyNDZjZGNhYzIwZjRkZDRkZGUxMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE1MWVkYTczMmZhYzk1MTBjM2FiMzY5NDI1NzBmMzIwZDAzOTQ4OWEzMTBlYTAzMzkwOTFhYzNlZmNkMzEzOWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_50318468970d49e497ea433ec236dfe9",
+      "statement": "InspectorView allows users to test queries in a hybrid retrieval simulator displaying RRF, dense similarity, and BM25 scores.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/views/InspectorView.tsx#L40-L145",
+          "version": "repo-lines-v1:sha256:f381227ca0baddb5962d4412e0e38511a104929632aabbbe21376008cc7ba4f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3OGE0YzRkOTMwNGUyZTQ3MGFkNDIxOGJjYjNiYzA3ZTVkZTFjZTQxNDM4OWYxMGU3Yjg2MjA4YzFkNDljYTE2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmMDMxYjg2ZjFmODU3YTA0N2Q1MWI0MTM4M2JhOGZlZDU4NzdmNzJhNTljNzIwMDMyODU5M2Q4OWM3YTE2YzZlIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMTEzY2Y4OTlkYjQ0NDY5YjY0MTVlNWY2MGE5ZmI2Yzg0YWQwMGIzNmI0ZTY0Njc0MDNhZTc1ZWVlNDMxMzNkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwYTUxMGEwYmM5MTk4NzVjMDY2YzMzNTUwZDI0MWY5ZjlhY2FjMDQ5ZDJmYzFhOGJhYmU1NGUxYTU2YjhlMDg4In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_99ac7196a0a84950b9d977e117a5ada2",
+      "statement": "Vite is configured with relative base paths and an automated GitHub Actions workflow to deploy the built dist output to GitHub Pages.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy.yml#L1-L38",
+          "version": "repo-lines-v1:sha256:0d1e9e474f3518c46195e61e21d793e292589c8f422e375bf5d43111b3ad8c55:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5OGI4YWRjMjU4MjA0MTAxYmUxM2M4OGYxNjM5MDc5ZTY0NTNiNzM1MTBhNDYxM2MwOTM4MjdkYjYwOWUwMjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwMjczNjc0ZDVkZDM5ZGFjNDVkNWQxMGUzZTIwODc1MTYwMjBjZmNjOTQzMDJkYzNkMzBkZTA4NjE3ZjhiNWIifQ"
+        },
+        {
+          "resource": "repo://vite.config.ts#L4-L12",
+          "version": "repo-lines-v1:sha256:be84bf5e786eb64c929feeec774ef956ff0c9c024f5278b079ed3099063b743b:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzMxNTM2YmQwOTljMjdlOWMzZDg0YjA5OTM4MTQ1M2RjZjQ0NmRiNzRkNGVkMzA2YTczMzlmN2Y1NGEwNzNlOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQwZmEzNTk1ZGVlMjIzZTg2NjMyYTE1MWY5YzNjMGI1OGU2NjlkODg1Njk1YWNmZTJhODc4YTgxZDAwYWQxYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2IyNjk0MmJjM2U1MDc4ZGI2YTJjZWJkMjgxMGFlZDZiYmQwMWJlYTkwMGM3ZjBmMThmYjYzNTIzMmM4MjVlNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODI2YzM4MzZiYTgwZDM0YjAwM2IzM2ExNWE3M2E4ZmQ0YTI5ZWM1YjBiMGFmZGVhNDVmYTE2NDQwZTE5NmU5MiJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-26T09:17:38.820Z"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:0c47a1e3e55ba8e0dee1056190833eb6a5321ead6bfa30e2baa33b8e34e111a9",
+  "claims": [
+    {
+      "id": "claim_5fdcf7fe3eaf4a82bfee9b9d902bdc8f",
+      "statement": "HybridRetriever merges MiniSearch BM25 and dense vector similarity using Reciprocal Rank Fusion with smoothing constant k=60.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/rag/retriever.ts#L62-L136",
+          "version": "repo-lines-v1:sha256:357acfba66a00cf85129d5777c23f5300ef420983a4e5f3043cbe60ed3cacb43:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ZDVhN2EwYjU5MGIwM2UyY2RhNzIxNDM3NTA2OTFhMzAxOTNkMzg3YTk3MzEzMWM3OTcyYzc1MDViNzYyMmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTU3ODhkNWQ5ZDczZDI0YTgxZGJjMGE1YTc0YmZhODJjOWMzYjNhZjk5ZTUyYWY3OTZlOTBiNDY4YThhM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI4ZWIyZWFmYjVmNzEzMmE5NTg0MzYxOWQzMTMyZTA3ZjYwMWJiNTI2MDkzMzRjMDM4ZTM5M2U2YzBiOWQ0MjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjViZTQxYTlkN2M3OWQ0ZTk2NDcxODQyNmMxYTk3NTlkYzQwNDAxOWExMWVlYjdjOTUwMWIwYzA5NTcyYTY1NzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_26c07b54e9a14c4198ef9d69f95cbe84",
+      "statement": "The small-model harness cleans raw text, deduplicates chunks via Jaccard overlap, and strictly budgets prompts to 2,400 tokens with 750 generation headroom.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/rag/harness.ts#L18-L86",
+          "version": "repo-lines-v1:sha256:ac303d09b98a8cc0b4013c83efcd964d99649c8f7d718c08e4aa7df9aabed559:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiYjNmMTZjZmQ0MmNjOTBlMjM4M2E5ZjcyMzhlMWEyZTZhNzY1Yzc0ZWNkZGFjOTY2MmQyMmJlNTYwMzA1YTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVlZWNhOWFmY2U1ZjIwMzVkOTdjYjgwNGEwNjI4MmE0YTEyMjM5ZWM1YTI0YWJiNmFlZmVlNzAzZTQ4YjhjODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNmOWUzOGQwZjM2MTM4YzIyZjg3MWY4ZWJiNGM1MTI5MDhkZmRhNTViMGZmYjMyZjU2ZjU5YjUzMzk1MjNmMDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4974a1e9defd4ccebb0d6c65dafc3d85",
+      "statement": "Hierarchical Map-Reduce summarization batches chunks into 3-chunk groups for intermediate point extraction before final executive synthesis.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/views/SummaryView.tsx#L55-L105",
+          "version": "repo-lines-v1:sha256:c97ac7440623d7e17f70e3f26b9d9e2bbfc6a753c106a586a626e03dde74d885:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4ZDM2NzM3MGZiMzQyOWRmMzA0MDU0ODA3MDBmYmZmNzZiNDU2NzZjYWNiYzFhOTM2ZDhlMGJjZWI3Y2FlMTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0ZDhmY2QzNmIyNmNmMzc1YWNjNzMxYTZhY2IzZDQ0MWIxMDZiN2FkYzVhNzNhMTUzMzVkYmI5M2YyNTUxNDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIwNDJmNjc2Yjg0MGE3YTEwMWU5ZDIxNTA3MzNkOGE4YTc0NzVmMGM0ZTZhY2EzYmE2ZTNkNzM2NTNjNjBiYjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRhZjIzYTQ0NWU4Nzg5ZTE0OGVkYzMyZjhiYjM0ZGZiNDdhNTkyOWIyNWMxZTg4NzMxYTUyOGRmMDZkZjA2NmUifQ"
+        },
+        {
+          "resource": "repo://src/lib/rag/harness.ts#L130-L157",
+          "version": "repo-lines-v1:sha256:4bc7f51809bc28fe4dcd54b9416a2c94e421606e6fc2c81825e92888d171e65e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4YjY5NTZmY2Y3NjEzOTBjZTJhZDZiMDViZTAzZjgwZDBmYzkzYjcwZTQxZDYyYWU5ZTg0NjgzOTI3M2M4MDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzODJkYjNmZDIxNmI0ZTQ1ZmY1MjhmZmVmOGNhNTBkNmU0MzllNjZmOTkxZTI2Mjc5OTFmMjI1YTJmN2I4MGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyMzU0MGY1MTQwOTdjNjQ3ODU3ZDI5MDQzN2ZkNjI1YmY3ZTMzM2ZhN2VlNDQ3MjcyMGNlM2EzODYwYWNkNDUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b0fdb771954c4e9db6392490414a90ec",
+      "statement": "Quiz generation uses progressive micro-tasking to generate one question per concept chunk with strict 4-option validation and phantom distractor cleanup.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/views/QuizView.tsx#L60-L105",
+          "version": "repo-lines-v1:sha256:0b4a040d41a4ac1ea4c4619c60149859e9a6c71a20e176f314c9c2d6a1a839ab:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1NmJmODdkYmVkZTBjOGJiNTE1ZjRjODQ1MDM3NzMwNzhkNDdmMTRkZmQxNjQ2ODc5ZjQ0OGQ3ODI2MmUzZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNzVjNzBkOTQ2MzYyNWUxMDc5ZmQ4ZmM4ZWU2MmFkMmU5MmM0MmJlYWFiZmQ4NWI3OGQ4ZTBhNDk3OWI5NGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhYWNiNTgyYzY3YzQzNzZjNWI4MDQ3MGIwMzEyZTQwZjg5MGJlMjU0MmRjZjkzZjM4NWVmNmI1NTdhMzRjNTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkzMTI3ZWFjMGFjYWYyOTg1YTZlYmZhM2Y1Yzk5OTFiZTM0OWRkNzk5Mjk5NDEzYzdlNDY2M2ExNWYwZDE4ODQifQ"
+        },
+        {
+          "resource": "repo://src/lib/rag/harness.ts#L189-L318",
+          "version": "repo-lines-v1:sha256:fd44fbf61494f1e0fa90e2c3945db56ed9553d7feadc1e2d1a9b80d1df8d1a02:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5NGQ2YTFmMmQ5MjQ3ZDQ2MDJmNTY1YTk5NTMzZWFhNmUwMTI5NWY4MGJmM2VhZGNhM2Y1YTU2ZTU4ZDU4YjkyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJjYzM3MTM3ZWY3NWJlYTE5NGVkMmRmYTBjYTU3YzMzZmM1YWVjYjQwNDA3ZWViM2Q4MmMwODQ0OTMxMTQ5MDI3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwOTNmNmM3NTAzNTkyMTNiN2U5N2U3MmU3NDMxOWVhMDA5OTkwOTE1ZmRmMDlkZWI4ODRlNmFmMGRlYzJmMmE2IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhNjJmNWE3ZGJhZjI5N2Y2MzUyNzM2ODkwMjIwMGFlMTc4MjA2MDgyNmYzOGZkZTRjN2U0OGE4ZmIzMjlkNWY2In0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-26T09:17:38.820Z"
+  }
+}

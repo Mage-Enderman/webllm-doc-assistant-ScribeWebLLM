@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:5e7880de8b7d0ca76f4c735a1799dba1fe963f7cb10dde477f4d8802babb86d8",
+  "claims": [
+    {
+      "id": "claim_1422858210a24191b6a20b48d34f2112",
+      "statement": "DocuBrain AI supports in-browser quantized models including Gemma 4 E2B, Gemma 4 E4B, Qwen 2.5 (0.5B/1.5B), Llama 3.2 (1B/3B), and SmolLM2.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/llm/engine.ts#L4-L46",
+          "version": "repo-lines-v1:sha256:92488ea8fc3705437ae92c2ed2e124de444437ee95f781935c6a4ebf484ecd40:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhMmY5YjViZTdlODY2Y2E5YjExZWUxOTlkNWNmNDA5YjJjMjViY2JiMTQ5ODg4YTdlMWUxOTIxYmJkMTA3NTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxMTFmMjM5YWM2NWM5ZmVjZDRmNzk3NWQ0ZWUwYzY3N2I1OGE4ZWE2Nzg1MmVhMjVkMjc5MjM5MjUxOGQyZjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRiNDZhMDQzOTllODZkYzQzYjhjY2MwZjJiMzYwZjUxZGYwNzU5MTBhZmI1ZTZmNGNlYjZjMGEwYzYxNTQzZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFhZTA4M2NlNDkzNDY4ZDc5NDQxNTg2MzhlZjQxM2IwNDEwMWJjMzIyYWU2N2Y1ZDllMzZmYTNlZGYyZjg2ZTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ed682c188a5c440ab8eae1660c00ed04",
+      "statement": "WebLLM runs in a background Web Worker via WebWorkerMLCEngineHandler to prevent WebGPU inference from blocking the React UI.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/llm/engine.ts#L106-L122",
+          "version": "repo-lines-v1:sha256:beb4e6901462095a3459e581000c4211d322722ad18ea23d698513e9301e8dda:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2Nzg3ZGRmYWQ4ZjBhNWIxZGM0NTA3OGM4NmQxOWFjN2RiODlhMzMyYjQyOTFiOGJkMzFmOWU5MTQwYjYwMTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyNzJhMGUyMjYwNmU5ODRmNzM1NGNiOGU3NjhmZWM2NDc5OWYxMjcwZWY5MjEzZjFjOGIxNzA2YmU1MzJmNjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZlOGY4ZDQ3Njc0MzY4ZTkyYmYzMjczNWIyYzcwMzczYzAwNGNiMzhlZjBjMmFhMjcyZmExNTU1Y2IzMTIwOGMifQ"
+        },
+        {
+          "resource": "repo://src/lib/llm/webllmWorker.ts#L1-L8",
+          "version": "repo-lines-v1:sha256:008be820620bd9f73fd92dbf25c5d2da8c88639288ca8c0a7d7523b7098d95fc:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWVlMWQ2MDU0YWRmNWViYmI2MjVlYmE5YzliNWZkZjJjMWQ5OWU0MGQxNmY1YmU2OTY2NDYyNmIxOGU2MWFhZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWExZDFhNjMzOTAyMjljNzk4MzQ3ZTgzYTA0MDU0NDFjOTQwMDAzNTI4NGFkMTY4YzFiZjZjZGYxZDcwYTM3MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_28a13b3dc3c84cbcad30360d182fb7f0",
+      "statement": "EmbeddingGemma 2 (270M) provides an 8,192-token context window, 768-dimensional vector space, and Matryoshka Representation Learning (MRL).",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/rag/embeddings.ts#L7-L28",
+          "version": "repo-lines-v1:sha256:659dd3f45c3d49f9336fa84f7817a73fab3de9538a33d386962a8bee909ca22e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiM2RhNTYzODRiYTIwYWEzNjM4MzUyYWZjZjliOTVkZjY3YWU1ODBkY2IxMjMyN2JlMTNiM2Q0ZjMxMzA5YTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwMmQyYzBkNmRjNWU3NGQ5MmZhMTRiOTFkYmVhMjY0MDkwYmViMzVmZGI5MTg4ZDliMzQxMTgxZGNlOWY0Y2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQwMDkzZGMzY2ZjZTU3ZmMyMjU5MWNmYjlmNWUzYjFmOGVhMzc5ZmM1ZmY3N2QyZGJjMTdiZmI4M2U0YzQ4NGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFlNThhMzVhYTNlN2Y2MjRhN2E4ZDBmMjY0OTEzNWM3MzM0MTQyNmU2MDdmMzMyMjM4YTAwZjJhMzM4ODY3MTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dac1486df76848d686842022a273e8e6",
+      "statement": "Embedding generation implements task-steered prompt formatting and mandatory L2-normalization as specified in Google's EmbeddingGemma 2 Developer Guide.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/rag/embeddings.ts#L88-L106",
+          "version": "repo-lines-v1:sha256:60b0ab08d346456ebcc72cc4090f6f0b7b245949babeb8f2d6f6c903b66ce9aa:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkyMWFlOGIxNjJjYmJjOTc1MzBlZjY5MTcxZWU2OTE5YWM2Y2QyOGRlOTVhNzY3MDk2NTJjMDNhMDkzNDE0OGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdmN2U2MWQwOTk1OTc4NDc2ZTA2MTRkNDg5MzZiNzdkYTZiMWEwYzQ0M2IyNDRmYjBiYTQzMTVlM2U5ZGQxNjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE1ZjE0MjYyNmViN2IzYTlkYjdhZjUwMWZhODdmZTFmZTVlMjMyMWEyMzU4ZmEzZmVjNzYzMzk0NTc5MWRiN2MifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-26T09:17:38.820Z"
+  }
+}

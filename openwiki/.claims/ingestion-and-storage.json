@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:05dd8818888fe865c9e2dc2bcb8d96141d49f6498b801d7adc5e675c027c5c82",
+  "claims": [
+    {
+      "id": "claim_ce29f03459f44b13ba6eb19ca0ab4ca1",
+      "statement": "Document ingestion in processAndIngestDocument coordinates text extraction, chunking, batch embeddings, and IndexedDB storage 100% client-side without a backend.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/ingestion/documentProcessor.ts#L53-L141",
+          "version": "repo-lines-v1:sha256:ff3a85a4288be1f0c0a727397e48713f3c8d2b1dd5875686ca45e52d23b03eef:eyJzZWxlY3RlZExpbmVDb3VudCI6ODksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyNzg5NjBmMTUwOGViOTg0MDExNTY0M2UxYjBlZDE1N2U1MjFlOWYzZDAxM2ExZGM1NDBjZTJmOTEwZDY4N2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0OWMzNjEyY2YwZGQzNGE3OTliMzlmZWFiOGE2M2M5YTQ0ZjcyYTVmOWNkOTUyMjk4OWIxZDM0NjU1NGRmNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_23ebde26cf964bb594c531707777e44d",
+      "statement": "extractTextFromPDF uses pdfjs-dist to parse PDF files page-by-page in-browser and attaches page numbers to chunk metadata.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/ingestion/documentProcessor.ts#L22-L48",
+          "version": "repo-lines-v1:sha256:759cccd418d1683036afdcab9369891c3127171d8e1ec5ab32401654d6863809:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiNzk4NWZlNzFkYWEzNjkzYjUyYjNkMWExYzY2Yjc1NTE0NmRhZmJlOTdlMjE5NWIxZGMyNWIyZTVhMTIwNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjliODAzMGYwNThhZWNiN2YzNmExY2MwMGZmZDVkOGJhM2RlYjgwYTVhOTZhZTlhNDIyOTU1MjMyYjE0ZDE0ZDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMzMjY4MDNiZTYwYjFhYmQ1OWU0MzhiM2RiYjVmYmRjODExZDczZjMwNTI4Y2Q2YTJhMzg2MDljZGM2OWJiODAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_40b8f38371664ccd8cc75e317fd89a54",
+      "statement": "splitTextIntoChunks recursively splits text by paragraph and sentence boundaries with 600-character target size and 100-character overlap.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/rag/chunker.ts#L20-L105",
+          "version": "repo-lines-v1:sha256:d64985cd1678096486361be977f8d434327893e9e4a04e39ad3010a572dd1e9c:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmNzY4MWExOTFhNDcxNjYzZTdmNGVmNDQxYjllZjQ1ZmUyNGIwOTFjMGU5ZjExOWUwMjI4Y2NlNWJhMzUwNzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM5MmNkZTY1MzVkMmE5MDAxZjVkMzVjZmE0NzQ0NTBlOTA4MWIyOWE1MDRkMjBhNzJjOWJlZTZiNjc2YTE3ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwZjUxOGVkNTgxNjZkM2Y4NmEwMGZkZTU5NDhlZDE3N2FmMTM2OTNkODRiZjkwNWY1NzJkOWY5MjgwYmJiOGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_660b7f08bd0346a49ae2df75b0e0682e",
+      "statement": "DocuBrainDatabase uses Dexie to persist documents, chunks, chat messages, quizzes, notes, and summaries across IndexedDB tables.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/db.ts#L4-L24",
+          "version": "repo-lines-v1:sha256:9fbea07b0a058fd7859b61739b4221171c3a5d358a5e7c9d89a6b7287a17c397:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4NmMzYjNkNTk3MDRiYzdkZmJmMzAwOWIxZDMyNGRlYWIxYTNmODczNTJiYWJjNTFiNmQ2MjdlMTVkMzQ2NTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4NTYxM2I5MjUyMGYzNzYxMjY3NjE2NDhkNDg1MDUzODg0ZmEyZTE2ODI4YjE4MjhmZmFjZTI4OWVmNjVmMWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2YzE2ODg1NjMwYjkxYmY4YWI5OGQxZDg3MTkwZWJkM2RmMDlmZDEyNWJmMDVkYWMwMmU1MWYxNjU2NTFiNTQifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-26T09:17:38.820Z"
+  }
+}
