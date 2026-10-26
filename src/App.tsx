@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, deleteDocumentWithChunks } from './lib/db';
+import { db, deleteDocumentWithChunks, deleteDocumentsWithChunks, clearAllData } from './lib/db';
 import { DocumentItem, ModelStatus } from './lib/types';
 import { AVAILABLE_MODELS, llmEngine } from './lib/llm/engine';
 import { globalRetriever } from './lib/rag/retriever';
@@ -19,7 +19,8 @@ import { Menu } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+  const selectedDocId = selectedDocIds.length === 1 ? selectedDocIds[0] : null;
   const [activeTab, setActiveTab] = useState<ActiveTab>('chat');
   const [selectedModelId, setSelectedModelId] = useState<string>(
     AVAILABLE_MODELS.find((m) => m.default)?.id || AVAILABLE_MODELS[0].id
@@ -130,16 +131,58 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleToggleDocSelect = (docId: string) => {
+    setSelectedDocIds((prev) =>
+      prev.includes(docId) ? prev.filter((id) => id !== docId) : [...prev, docId]
+    );
+  };
+
+  const handleSelectSingleDoc = (docId: string | null) => {
+    if (!docId) {
+      setSelectedDocIds([]);
+    } else {
+      setSelectedDocIds([docId]);
+    }
+  };
+
+  const handleSelectAllDocs = () => {
+    setSelectedDocIds(documents.map((d) => d.id));
+  };
+
+  const handleClearDocSelection = () => {
+    setSelectedDocIds([]);
+  };
+
   const handleDeleteDoc = async (docId: string) => {
     try {
       await deleteDocumentWithChunks(docId);
       globalRetriever.removeDocChunks(docId);
-      if (selectedDocId === docId) {
-        setSelectedDocId(null);
-      }
+      setSelectedDocIds((prev) => prev.filter((id) => id !== docId));
       await loadDocumentsAndChunks();
     } catch (err) {
       console.error('Failed to delete document:', err);
+    }
+  };
+
+  const handleDeleteDocs = async (docIds: string[]) => {
+    try {
+      await deleteDocumentsWithChunks(docIds);
+      globalRetriever.removeDocChunks(docIds);
+      setSelectedDocIds((prev) => prev.filter((id) => !docIds.includes(id)));
+      await loadDocumentsAndChunks();
+    } catch (err) {
+      console.error('Failed to delete multiple documents:', err);
+    }
+  };
+
+  const handleClearAllDocs = async () => {
+    try {
+      await clearAllData();
+      globalRetriever.setChunks([]);
+      setSelectedDocIds([]);
+      await loadDocumentsAndChunks();
+    } catch (err) {
+      console.error('Failed to clear knowledge base:', err);
     }
   };
 
@@ -191,12 +234,17 @@ export const App: React.FC = () => {
         {/* Knowledge Base Sidebar */}
         <Sidebar
           documents={documents}
-          selectedDocId={selectedDocId}
-          onSelectDoc={(id) => setSelectedDocId(id)}
+          selectedDocIds={selectedDocIds}
+          onToggleDocSelect={handleToggleDocSelect}
+          onSelectSingleDoc={handleSelectSingleDoc}
+          onSelectAllDocs={handleSelectAllDocs}
+          onClearDocSelection={handleClearDocSelection}
           onUploadFile={handleUploadFile}
           onAddNote={handleAddNote}
           onLoadSample={loadSampleDocument}
           onDeleteDoc={handleDeleteDoc}
+          onDeleteDocs={handleDeleteDocs}
+          onClearAllDocs={handleClearAllDocs}
           ingestionProgress={ingestionProgress}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -229,8 +277,10 @@ export const App: React.FC = () => {
               <ChatView
                 documents={documents}
                 selectedDocId={selectedDocId}
+                selectedDocIds={selectedDocIds}
                 modelStatus={modelStatus}
                 onInitializeModel={handleInitializeModel}
+                onDeleteDoc={handleDeleteDoc}
               />
             )}
 
@@ -238,6 +288,7 @@ export const App: React.FC = () => {
               <SummaryView
                 documents={documents}
                 selectedDocId={selectedDocId}
+                selectedDocIds={selectedDocIds}
                 modelStatus={modelStatus}
                 onInitializeModel={handleInitializeModel}
               />
@@ -247,6 +298,7 @@ export const App: React.FC = () => {
               <NotesView
                 documents={documents}
                 selectedDocId={selectedDocId}
+                selectedDocIds={selectedDocIds}
                 modelStatus={modelStatus}
                 onInitializeModel={handleInitializeModel}
               />
@@ -256,6 +308,7 @@ export const App: React.FC = () => {
               <QuizView
                 documents={documents}
                 selectedDocId={selectedDocId}
+                selectedDocIds={selectedDocIds}
                 modelStatus={modelStatus}
                 onInitializeModel={handleInitializeModel}
               />
@@ -265,6 +318,7 @@ export const App: React.FC = () => {
               <FlashcardView
                 documents={documents}
                 selectedDocId={selectedDocId}
+                selectedDocIds={selectedDocIds}
                 modelStatus={modelStatus}
                 onInitializeModel={handleInitializeModel}
               />

@@ -1,9 +1,9 @@
-# 🧠 DocuBrain AI — In-Browser WebLLM Learning Assistant
+# 🧠 ScribeWebLLM — In-Browser WebLLM Learning Assistant
 
 > **Private, 100% In-Browser Documentation Learning Assistant powered by WebGPU, WebLLM, and Client-Side Hybrid RAG.**  
 > Hostable directly as a static **GitHub Page** with **zero backend server or API keys required**.
 
-Inspired by [rimc008/Rag_project2](https://github.com/rimc008/Rag_project2), DocuBrain AI elevates the document learning workflow into a pure client-side experience: your documents, embeddings, and language model execute entirely inside your browser's WebGPU sandbox. No document content or queries ever leave your machine.
+Inspired by [rimc008/Rag_project2](https://github.com/rimc008/Rag_project2), ScribeWebLLM elevates the document learning workflow into a pure client-side experience: your documents, embeddings, and language model execute entirely inside your browser's WebGPU sandbox. No document content or queries ever leave your machine.
 
 ---
 
@@ -23,7 +23,7 @@ Inspired by [rimc008/Rag_project2](https://github.com/rimc008/Rag_project2), Doc
 
 Small models running in browser WebGPU memory (0.5B to 3B parameters like `Qwen2.5-0.5B`, `Llama-3.2-1B`, or `SmolLM2-1.7B`) have tight context limits and can easily suffer from distraction or hallucination if context is assembled poorly.
 
-DocuBrain AI incorporates a specialized **Small-Model Harness**:
+ScribeWebLLM incorporates a specialized **Small-Model Harness**:
 
 ```
                   User Query / Task
@@ -108,7 +108,7 @@ This app is 100% static client-side and includes a pre-configured GitHub Actions
    ```bash
    git init
    git add .
-   git commit -m "Initial commit of DocuBrain AI"
+   git commit -m "Initial commit of ScribeWebLLM"
    git remote add origin https://github.com/<your-username>/<repo-name>.git
    git push -u origin main
    ```

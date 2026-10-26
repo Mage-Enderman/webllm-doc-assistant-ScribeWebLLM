@@ -13,19 +13,26 @@ import {
   FileSpreadsheet,
   X,
   FileQuestion,
-  HelpCircle,
+  CheckSquare,
+  Square,
+  FolderOpen,
 } from 'lucide-react';
 import { DocumentItem } from '../lib/types';
 import { IngestionProgress } from '../lib/ingestion/documentProcessor';
 
 interface SidebarProps {
   documents: DocumentItem[];
-  selectedDocId: string | null;
-  onSelectDoc: (docId: string | null) => void;
+  selectedDocIds: string[];
+  onToggleDocSelect: (docId: string) => void;
+  onSelectSingleDoc: (docId: string | null) => void;
+  onSelectAllDocs: () => void;
+  onClearDocSelection: () => void;
   onUploadFile: (file: File) => void;
   onAddNote: (title: string, content: string) => void;
   onLoadSample: (sampleIndex: number) => void;
   onDeleteDoc: (docId: string) => void;
+  onDeleteDocs: (docIds: string[]) => void;
+  onClearAllDocs: () => void;
   ingestionProgress: IngestionProgress | null;
   isOpen: boolean;
   onClose: () => void;
@@ -33,12 +40,17 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   documents,
-  selectedDocId,
-  onSelectDoc,
+  selectedDocIds,
+  onToggleDocSelect,
+  onSelectSingleDoc,
+  onSelectAllDocs,
+  onClearDocSelection,
   onUploadFile,
   onAddNote,
   onLoadSample,
   onDeleteDoc,
+  onDeleteDocs,
+  onClearAllDocs,
   ingestionProgress,
   isOpen,
   onClose,
@@ -53,6 +65,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const filteredDocs = documents.filter((doc) =>
     doc.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const isAllSelected =
+    documents.length > 0 && selectedDocIds.length === documents.length;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -90,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const getDocIcon = (type: string) => {
     switch (type) {
       case 'pdf':
-        return <FileSpreadsheet className="h-4 w-4 text-red-500" />;
+        return <FileSpreadsheet className="h-4 w-4 text-rose-500" />;
       case 'markdown':
         return <FileCode className="h-4 w-4 text-indigo-500" />;
       default:
@@ -193,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Search & Scope Filter */}
+        {/* Search & Multi-Doc Group Scope Filter */}
         <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2">
           <div className="relative">
             <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -206,19 +221,65 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
           </div>
 
-          {/* Active Scope Toggle */}
-          <div className="flex items-center justify-between text-xs px-1">
-            <span className="text-slate-400 text-[11px]">RAG Query Scope:</span>
-            <button
-              onClick={() => onSelectDoc(null)}
-              className={`text-[11px] font-semibold px-2 py-0.5 rounded-md transition-colors ${
-                selectedDocId === null
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-indigo-600 dark:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              All Documents
-            </button>
+          {/* Grouping / Scope Controls */}
+          <div className="flex flex-col gap-1.5 pt-1">
+            <div className="flex items-center justify-between text-xs px-0.5">
+              <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium flex items-center gap-1">
+                <FolderOpen className="h-3 w-3 text-indigo-500" />
+                <span>Scope:</span>
+              </span>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={onClearDocSelection}
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${
+                    selectedDocIds.length === 0
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-indigo-600 dark:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                  title="Query all documents across the knowledge base"
+                >
+                  All Docs
+                </button>
+
+                {documents.length > 1 && (
+                  <button
+                    onClick={isAllSelected ? onClearDocSelection : onSelectAllDocs}
+                    className="text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    {isAllSelected ? 'Deselect All' : 'Select All'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Active Group / Multi-Selection Toolbar */}
+            {selectedDocIds.length > 0 && (
+              <div className="flex items-center justify-between bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/60 rounded-lg px-2 py-1 text-[11px]">
+                <span className="text-indigo-700 dark:text-indigo-300 font-semibold truncate">
+                  {selectedDocIds.length === 1
+                    ? '1 doc selected'
+                    : `Group: ${selectedDocIds.length} docs selected`}
+                </span>
+
+                <button
+                  onClick={() => {
+                    if (
+                      confirm(
+                        `Delete ${selectedDocIds.length} selected document(s) and their chunks?`
+                      )
+                    ) {
+                      onDeleteDocs(selectedDocIds);
+                    }
+                  }}
+                  className="text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:underline flex items-center gap-1 font-semibold"
+                  title="Delete all selected documents"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span>Delete Selected</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -234,24 +295,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           ) : (
             filteredDocs.map((doc) => {
-              const isSelected = selectedDocId === doc.id;
+              const isChecked = selectedDocIds.includes(doc.id);
 
               return (
                 <div
                   key={doc.id}
-                  onClick={() => onSelectDoc(isSelected ? null : doc.id)}
+                  onClick={() => onToggleDocSelect(doc.id)}
                   className={`group relative p-2.5 rounded-xl border transition-all cursor-pointer ${
-                    isSelected
+                    isChecked
                       ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 shadow-sm'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
+                      {/* Checkbox for Multi-Doc Group Selection */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleDocSelect(doc.id);
+                        }}
+                        className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-0.5 rounded shrink-0"
+                      >
+                        {isChecked ? (
+                          <CheckSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                        ) : (
+                          <Square className="h-4 w-4 text-slate-400" />
+                        )}
+                      </button>
+
                       {getDocIcon(doc.type)}
+
                       <h3
                         className={`text-xs font-semibold truncate ${
-                          isSelected
+                          isChecked
                             ? 'text-indigo-900 dark:text-indigo-200'
                             : 'text-slate-800 dark:text-slate-200'
                         }`}
@@ -261,21 +339,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       </h3>
                     </div>
 
+                    {/* Visible Delete Button with confirmation */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (confirm(`Remove "${doc.title}"?`)) {
+                        if (confirm(`Remove "${doc.title}" and its chunks from local storage?`)) {
                           onDeleteDoc(doc.id);
                         }
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-opacity rounded"
-                      title="Delete document"
+                      className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors shrink-0"
+                      title={`Delete "${doc.title}"`}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pl-6">
                     <span className="flex items-center gap-1 font-mono">
                       <Layers className="h-3 w-3" />
                       {doc.chunkCount} chunks
@@ -288,60 +367,48 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* Footer info */}
+        {/* Footer info & Clear All Documents */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-400 flex items-center justify-between">
-          <span>Local Storage: IndexedDB</span>
+          {documents.length > 0 ? (
+            <button
+              onClick={() => {
+                if (
+                  confirm(
+                    'Are you sure you want to delete ALL documents, chunks, and learning data from IndexedDB?'
+                  )
+                ) {
+                  onClearAllDocs();
+                }
+              }}
+              className="text-[11px] text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 font-medium"
+            >
+              <Trash2 className="h-3 w-3" />
+              <span>Clear Knowledge Base</span>
+            </button>
+          ) : (
+            <span>IndexedDB Storage</span>
+          )}
+
           <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" /> Encrypted by OS
+            <CheckCircle2 className="h-3 w-3" /> 100% In-Browser
           </span>
         </div>
       </aside>
 
-      {/* Ingestion Progress Modal */}
-      {ingestionProgress && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-                <Sparkles className="h-6 w-6 animate-spin" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Ingesting Document
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {ingestionProgress.message}
-                </p>
-              </div>
-            </div>
-
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden mb-2">
-              <div
-                className="bg-indigo-600 h-2 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${Math.round(ingestionProgress.progress * 100)}%` }}
-              />
-            </div>
-
-            <p className="text-[11px] text-slate-400 text-right">
-              {Math.round(ingestionProgress.progress * 100)}%
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Manual Note Modal */}
+      {/* Paste Note Modal */}
       {showNoteModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 shadow-2xl animate-fade-in">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Add Custom Note / Documentation
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Plus className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <span>Paste Study Note or Raw Text</span>
               </h3>
               <button
                 onClick={() => setShowNoteModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
@@ -352,25 +419,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. System Architecture Notes.md"
+                  placeholder="e.g. Memory Management Lecture Notes"
                   value={noteTitle}
                   onChange={(e) => setNoteTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-slate-100"
                   required
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Content (Markdown or Plain Text)
+                  Note Content
                 </label>
                 <textarea
+                  placeholder="Paste or write notes, code explanations, or documentation here..."
                   rows={8}
-                  placeholder="Paste documentation, lecture notes, or code snippets here..."
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-slate-100 font-mono text-xs"
                   required
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
@@ -378,13 +445,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowNoteModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-all"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all"
                 >
                   Save & Ingest Note
                 </button>

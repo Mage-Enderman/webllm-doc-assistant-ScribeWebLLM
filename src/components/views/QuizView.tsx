@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Award,
@@ -22,7 +22,8 @@ import {
 
 interface QuizViewProps {
   documents: DocumentItem[];
-  selectedDocId: string | null;
+  selectedDocId?: string | null;
+  selectedDocIds?: string[];
   modelStatus: ModelStatus;
   onInitializeModel: () => void;
 }
@@ -30,12 +31,16 @@ interface QuizViewProps {
 export const QuizView: React.FC<QuizViewProps> = ({
   documents,
   selectedDocId,
+  selectedDocIds = [],
   modelStatus,
   onInitializeModel,
 }) => {
-  const [activeDocId, setActiveDocId] = useState<string>(
-    selectedDocId || (documents[0]?.id ?? '')
-  );
+  const [targetScope, setTargetScope] = useState<string>(() => {
+    if (selectedDocIds.length > 1) return 'group';
+    if (selectedDocId) return selectedDocId;
+    return documents[0]?.id ?? '';
+  });
+
   const [questionCount, setQuestionCount] = useState<number>(5);
   const [isGenerating, setIsGenerating] = useState(false);
   const [quizProgress, setQuizProgress] = useState<{ current: number; total: number; message: string } | null>(null);
@@ -44,10 +49,29 @@ export const QuizView: React.FC<QuizViewProps> = ({
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [isCompleted, setIsCompleted] = useState(false);
 
-  const activeDoc = documents.find((d) => d.id === activeDocId) || documents[0];
+  useEffect(() => {
+    if (selectedDocIds.length > 1) {
+      setTargetScope('group');
+    } else if (selectedDocId) {
+      setTargetScope(selectedDocId);
+    }
+  }, [selectedDocIds, selectedDocId]);
+
+  const getTargetDocs = (): DocumentItem[] => {
+    if (targetScope === 'group') {
+      const docs = documents.filter((d) => selectedDocIds.includes(d.id));
+      return docs.length > 0 ? docs : documents;
+    }
+    if (targetScope === 'all') {
+      return documents;
+    }
+    const single = documents.find((d) => d.id === targetScope);
+    return single ? [single] : documents.slice(0, 1);
+  };
 
   const handleGenerateQuiz = async () => {
-    if (!activeDoc) return;
+    const targetDocs = getTargetDocs();
+    if (targetDocs.length === 0) return;
 
     if (modelStatus.state !== 'ready') {
       onInitializeModel();
@@ -61,16 +85,17 @@ export const QuizView: React.FC<QuizViewProps> = ({
     setIsCompleted(false);
 
     try {
+      const targetDocIds = targetDocs.map((d) => d.id);
       const allChunks = await db.chunks
         .where('docId')
-        .equals(activeDoc.id)
+        .anyOf(targetDocIds)
         .sortBy('chunkIndex');
 
       if (allChunks.length === 0) {
-        throw new Error('No chunks found for this document.');
+        throw new Error('No chunks found for the selected scope.');
       }
 
-      // Sample distinct concept chunks evenly across the document
+      // Sample distinct concept chunks evenly across the target documents
       const step = Math.max(1, Math.floor(allChunks.length / questionCount));
       const selectedChunks: typeof allChunks = [];
       for (let i = 0; i < questionCount && i * step < allChunks.length; i++) {
@@ -208,15 +233,25 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <select
-              aria-label="Select Document for Quiz"
-              value={activeDoc?.id || ''}
-              onChange={(e) => setActiveDocId(e.target.value)}
+              aria-label="Select Scope for Quiz"
+              value={targetScope}
+              onChange={(e) => setTargetScope(e.target.value)}
               disabled={isGenerating}
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-medium max-w-[180px] truncate"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-medium max-w-[200px] truncate"
             >
+              {selectedDocIds.length > 1 && (
+                <option value="group">
+                  📁 Active Group ({selectedDocIds.length} docs)
+                </option>
+              )}
+              {documents.length > 1 && (
+                <option value="all">
+                  📚 All Documents ({documents.length} docs)
+                </option>
+              )}
               {documents.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.title}
+                  📄 {d.title}
                 </option>
               ))}
             </select>

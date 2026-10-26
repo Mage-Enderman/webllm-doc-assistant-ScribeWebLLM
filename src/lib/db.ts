@@ -9,7 +9,7 @@ import {
   Flashcard,
 } from './types';
 
-export class DocuBrainDatabase extends Dexie {
+export class ScribeWebLLMDatabase extends Dexie {
   documents!: Table<DocumentItem, string>;
   chunks!: Table<ChunkItem, string>;
   messages!: Table<ChatMessage, string>;
@@ -19,7 +19,7 @@ export class DocuBrainDatabase extends Dexie {
   flashcards!: Table<Flashcard, string>;
 
   constructor() {
-    super('DocuBrainDB');
+    super('ScribeWebLLMDB');
     this.version(1).stores({
       documents: 'id, title, type, createdAt',
       chunks: 'id, docId, chunkIndex',
@@ -41,7 +41,7 @@ export class DocuBrainDatabase extends Dexie {
   }
 }
 
-export const db = new DocuBrainDatabase();
+export const db = new ScribeWebLLMDatabase();
 
 export async function clearAllData(): Promise<void> {
   await db.transaction(
@@ -67,7 +67,8 @@ export async function clearAllData(): Promise<void> {
   );
 }
 
-export async function deleteDocumentWithChunks(docId: string): Promise<void> {
+export async function deleteDocumentsWithChunks(docIds: string[]): Promise<void> {
+  if (docIds.length === 0) return;
   await db.transaction(
     'rw',
     [
@@ -79,12 +80,18 @@ export async function deleteDocumentWithChunks(docId: string): Promise<void> {
       db.flashcards,
     ],
     async () => {
-      await db.documents.delete(docId);
-      await db.chunks.where('docId').equals(docId).delete();
-      await db.quizzes.where('docId').equals(docId).delete();
-      await db.notes.where('docId').equals(docId).delete();
-      await db.summaries.where('docId').equals(docId).delete();
-      await db.flashcards.where('docId').equals(docId).delete();
+      for (const docId of docIds) {
+        await db.documents.delete(docId);
+        await db.chunks.where('docId').equals(docId).delete();
+        await db.quizzes.where('docId').equals(docId).delete();
+        await db.notes.where('docId').equals(docId).delete();
+        await db.summaries.where('docId').equals(docId).delete();
+        await db.flashcards.where('docId').equals(docId).delete();
+      }
     }
   );
+}
+
+export async function deleteDocumentWithChunks(docId: string): Promise<void> {
+  await deleteDocumentsWithChunks([docId]);
 }

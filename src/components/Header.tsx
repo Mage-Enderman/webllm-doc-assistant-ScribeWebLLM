@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">
-                DocuBrain<span className="text-indigo-600 dark:text-indigo-400">.ai</span>
+                Scribe<span className="text-indigo-600 dark:text-indigo-400">WebLLM</span>
               </span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50">
                 WebLLM RAG

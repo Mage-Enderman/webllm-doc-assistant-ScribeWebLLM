@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   Sparkles,
@@ -10,6 +10,7 @@ import {
   RefreshCw,
   BookOpen,
   ArrowRight,
+  FolderOpen,
 } from 'lucide-react';
 import { DocumentItem, ModelStatus } from '../../lib/types';
 import { db } from '../../lib/db';
@@ -17,11 +18,13 @@ import { llmEngine } from '../../lib/llm/engine';
 import {
   buildChunkBatchSummaryPrompt,
   buildFinalSummaryPrompt,
+  buildMultiDocSummaryPrompt,
 } from '../../lib/rag/harness';
 
 interface SummaryViewProps {
   documents: DocumentItem[];
-  selectedDocId: string | null;
+  selectedDocId?: string | null;
+  selectedDocIds?: string[];
   modelStatus: ModelStatus;
   onInitializeModel: () => void;
 }
@@ -29,22 +32,47 @@ interface SummaryViewProps {
 export const SummaryView: React.FC<SummaryViewProps> = ({
   documents,
   selectedDocId,
+  selectedDocIds = [],
   modelStatus,
   onInitializeModel,
 }) => {
-  const [activeDocId, setActiveDocId] = useState<string>(
-    selectedDocId || (documents[0]?.id ?? '')
-  );
+  // Target scope: can be 'group' (selectedDocIds), 'all', or a single doc ID
+  const [targetScope, setTargetScope] = useState<string>(() => {
+    if (selectedDocIds.length > 1) return 'group';
+    if (selectedDocId) return selectedDocId;
+    return documents[0]?.id ?? '';
+  });
+
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [currentStep, setCurrentStep] = useState<string>('');
   const [mapProgress, setMapProgress] = useState<{ current: number; total: number } | null>(null);
   const [summaryResult, setSummaryResult] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const activeDoc = documents.find((d) => d.id === activeDocId) || documents[0];
+  useEffect(() => {
+    if (selectedDocIds.length > 1) {
+      setTargetScope('group');
+    } else if (selectedDocId) {
+      setTargetScope(selectedDocId);
+    }
+  }, [selectedDocIds, selectedDocId]);
+
+  // Determine target documents based on targetScope
+  const getTargetDocs = (): DocumentItem[] => {
+    if (targetScope === 'group') {
+      const docs = documents.filter((d) => selectedDocIds.includes(d.id));
+      return docs.length > 0 ? docs : documents;
+    }
+    if (targetScope === 'all') {
+      return documents;
+    }
+    const single = documents.find((d) => d.id === targetScope);
+    return single ? [single] : documents.slice(0, 1);
+  };
 
   const handleGenerateSummary = async () => {
-    if (!activeDoc) return;
+    const targetDocs = getTargetDocs();
+    if (targetDocs.length === 0) return;
 
     if (modelStatus.state !== 'ready') {
       onInitializeModel();
@@ -53,76 +81,115 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 
     setIsSummarizing(true);
     setSummaryResult(null);
-    setCurrentStep('Retrieving document chunks from IndexedDB...');
 
     try {
-      // 1. Fetch all chunks for this document
-      const chunks = await db.chunks.where('docId').equals(activeDoc.id).sortBy('chunkIndex');
-      if (chunks.length === 0) {
-        throw new Error('No chunks found for this document.');
-      }
+      if (targetDocs.length === 1) {
+        // Single Document Map-Reduce
+        const doc = targetDocs[0];
+        setCurrentStep(`Retrieving chunks for "${doc.title}"...`);
 
-      // 2. Map-Reduce Execution
-      // If doc is small (<= 3 chunks), direct summary
-      let finalSummary = '';
-
-      if (chunks.length <= 3) {
-        setCurrentStep('Synthesizing direct executive summary...');
-        const texts = chunks.map((c) => c.text);
-        const { system, user } = buildFinalSummaryPrompt(texts, activeDoc.title);
-
-        finalSummary = await llmEngine.completeChat(
-          [
-            { role: 'system', content: system },
-            { role: 'user', content: user },
-          ],
-          { temperature: 0.2, max_tokens: 850 }
-        );
-      } else {
-        // Hierarchical Map-Reduce:
-        // Batch chunks in groups of 3
-        const batchSize = 3;
-        const batches: string[][] = [];
-        for (let i = 0; i < chunks.length; i += batchSize) {
-          batches.push(chunks.slice(i, i + batchSize).map((c) => c.text));
+        const chunks = await db.chunks.where('docId').equals(doc.id).sortBy('chunkIndex');
+        if (chunks.length === 0) {
+          throw new Error(`No chunks found for "${doc.title}".`);
         }
 
-        const intermediatePoints: string[] = [];
-        setMapProgress({ current: 0, total: batches.length });
+        let finalSummary = '';
 
-        for (let b = 0; b < batches.length; b++) {
-          setCurrentStep(`Map Stage: Extracting key insights from Batch ${b + 1} of ${batches.length}...`);
-          setMapProgress({ current: b + 1, total: batches.length });
+        if (chunks.length <= 3) {
+          setCurrentStep('Synthesizing direct executive summary...');
+          const texts = chunks.map((c) => c.text);
+          const { system, user } = buildFinalSummaryPrompt(texts, doc.title);
 
-          const { system, user } = buildChunkBatchSummaryPrompt(batches[b]);
-          const batchSummary = await llmEngine.completeChat(
+          finalSummary = await llmEngine.completeChat(
             [
               { role: 'system', content: system },
               { role: 'user', content: user },
             ],
-            { temperature: 0.2, max_tokens: 450 }
+            { temperature: 0.2, max_tokens: 850 }
           );
-          intermediatePoints.push(batchSummary);
+        } else {
+          const batchSize = 3;
+          const batches: string[][] = [];
+          for (let i = 0; i < chunks.length; i += batchSize) {
+            batches.push(chunks.slice(i, i + batchSize).map((c) => c.text));
+          }
+
+          const intermediatePoints: string[] = [];
+          setMapProgress({ current: 0, total: batches.length });
+
+          for (let b = 0; b < batches.length; b++) {
+            setCurrentStep(`Map Stage: Extracting insights from Batch ${b + 1} of ${batches.length}...`);
+            setMapProgress({ current: b + 1, total: batches.length });
+
+            const { system, user } = buildChunkBatchSummaryPrompt(batches[b]);
+            const batchSummary = await llmEngine.completeChat(
+              [
+                { role: 'system', content: system },
+                { role: 'user', content: user },
+              ],
+              { temperature: 0.2, max_tokens: 450 }
+            );
+            intermediatePoints.push(batchSummary);
+          }
+
+          setCurrentStep('Reduce Stage: Synthesizing final structured executive report...');
+          setMapProgress(null);
+
+          const { system, user } = buildFinalSummaryPrompt(intermediatePoints, doc.title);
+          finalSummary = await llmEngine.completeChat(
+            [
+              { role: 'system', content: system },
+              { role: 'user', content: user },
+            ],
+            { temperature: 0.2, max_tokens: 900 }
+          );
         }
 
-        // Reduce Stage:
-        setCurrentStep('Reduce Stage: Synthesizing final structured executive report...');
+        setSummaryResult(finalSummary);
+      } else {
+        // Multi-Document Group Synthesis
+        const docSummaries: { title: string; summary: string }[] = [];
+
+        for (let i = 0; i < targetDocs.length; i++) {
+          const doc = targetDocs[i];
+          setCurrentStep(`Digest ${i + 1}/${targetDocs.length}: Extracting core points from "${doc.title}"...`);
+          setMapProgress({ current: i + 1, total: targetDocs.length });
+
+          const chunks = await db.chunks.where('docId').equals(doc.id).sortBy('chunkIndex');
+          if (chunks.length === 0) continue;
+
+          // Quick distillation for multi-doc
+          const sampleTexts = chunks.slice(0, 4).map((c) => c.text);
+          const { system, user } = buildChunkBatchSummaryPrompt(sampleTexts);
+
+          const summary = await llmEngine.completeChat(
+            [
+              { role: 'system', content: system },
+              { role: 'user', content: user },
+            ],
+            { temperature: 0.2, max_tokens: 400 }
+          );
+
+          docSummaries.push({ title: doc.title, summary });
+        }
+
+        setCurrentStep('Cross-Document Stage: Synthesizing unified multi-document report...');
         setMapProgress(null);
 
-        const { system, user } = buildFinalSummaryPrompt(intermediatePoints, activeDoc.title);
-        finalSummary = await llmEngine.completeChat(
+        const { system, user } = buildMultiDocSummaryPrompt(docSummaries);
+        const unifiedSummary = await llmEngine.completeChat(
           [
             { role: 'system', content: system },
             { role: 'user', content: user },
           ],
-          { temperature: 0.2, max_tokens: 900 }
+          { temperature: 0.2, max_tokens: 950 }
         );
-      }
 
-      setSummaryResult(finalSummary);
+        setSummaryResult(unifiedSummary);
+      }
     } catch (err: any) {
       console.error('Summary generation error:', err);
-      alert(`Summary generation failed: ${err.message}`);
+      alert(`Summary generation notice: ${err.message || 'Error occurred during small model summarization.'}`);
     } finally {
       setIsSummarizing(false);
       setCurrentStep('');
@@ -138,14 +205,15 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
   };
 
   const downloadSummaryMarkdown = () => {
-    if (!summaryResult || !activeDoc) return;
-    const blob = new Blob([summaryResult], { type: 'text/markdown' });
+    if (!summaryResult) return;
+    const blob = new Blob([summaryResult], { type: 'text/markdown;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${activeDoc.title}_Summary.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Summary-${Date.now()}.md`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (documents.length === 0) {
@@ -162,6 +230,8 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
     );
   }
 
+  const targetDocs = getTargetDocs();
+
   return (
     <div className="flex-1 max-w-5xl mx-auto w-full p-4 space-y-6">
       {/* Configuration Header */}
@@ -175,21 +245,31 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
               </h2>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Uses a two-stage Map-Reduce pipeline designed to digest large documents with small browser models.
+              Digest individual documents or group multiple documents together into an executive comparative synthesis.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <select
-              aria-label="Select Document for Summary"
-              value={activeDoc?.id || ''}
-              onChange={(e) => setActiveDocId(e.target.value)}
+              aria-label="Select Scope for Summary"
+              value={targetScope}
+              onChange={(e) => setTargetScope(e.target.value)}
               disabled={isSummarizing}
-              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-medium max-w-[220px] truncate"
+              className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer font-medium max-w-[240px] truncate"
             >
+              {selectedDocIds.length > 1 && (
+                <option value="group">
+                  📁 Active Group ({selectedDocIds.length} docs)
+                </option>
+              )}
+              {documents.length > 1 && (
+                <option value="all">
+                  📚 All Documents ({documents.length} docs)
+                </option>
+              )}
               {documents.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.title} ({d.chunkCount} chunks)
+                  📄 {d.title} ({d.chunkCount} chunks)
                 </option>
               ))}
             </select>
@@ -207,7 +287,11 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
               ) : (
                 <>
                   <Sparkles className="h-3.5 w-3.5" />
-                  <span>Generate Summary</span>
+                  <span>
+                    {targetDocs.length > 1
+                      ? `Summarize Group (${targetDocs.length} Docs)`
+                      : 'Generate Summary'}
+                  </span>
                 </>
               )}
             </button>
@@ -219,21 +303,23 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
           <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400">
               <span className="flex items-center gap-2">
-                <Layers className="h-4 w-4 animate-pulse" />
-                {currentStep}
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                <span>{currentStep}</span>
               </span>
               {mapProgress && (
                 <span>
-                  Batch {mapProgress.current} / {mapProgress.total}
+                  {mapProgress.current} / {mapProgress.total}
                 </span>
               )}
             </div>
 
             {mapProgress && (
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-indigo-500 to-violet-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(mapProgress.current / mapProgress.total) * 100}%` }}
+                  className="bg-indigo-600 h-full transition-all duration-300 rounded-full"
+                  style={{
+                    width: `${(mapProgress.current / mapProgress.total) * 100}%`,
+                  }}
                 />
               </div>
             )}
@@ -243,22 +329,21 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 
       {/* Summary Output */}
       {summaryResult ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm relative">
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Executive Synthesis: {activeDoc?.title}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                {targetDocs.length > 1
+                  ? `Multi-Document Synthesis (${targetDocs.length} Documents)`
+                  : `Structured Summary: ${targetDocs[0]?.title}`}
               </h3>
-              <p className="text-xs text-slate-400">
-                Generated locally using {activeDoc?.chunkCount} chunks via WebLLM Map-Reduce
-              </p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={copyToClipboard}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                title="Copy markdown"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -266,28 +351,24 @@ export const SummaryView: React.FC<SummaryViewProps> = ({
 
               <button
                 onClick={downloadSummaryMarkdown}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                title="Download .md"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold transition-colors"
               >
                 <Download className="h-3.5 w-3.5" />
-                <span>Export .md</span>
+                <span>Save Markdown</span>
               </button>
             </div>
           </div>
 
-          <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap leading-relaxed text-slate-800 dark:text-slate-200">
+          <div className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-sans">
             {summaryResult}
           </div>
         </div>
       ) : (
         !isSummarizing && (
-          <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-10 text-center">
-            <Sparkles className="h-8 w-8 mx-auto text-indigo-400 mb-2 opacity-60" />
-            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Ready to synthesize document
-            </h4>
-            <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
-              Select <strong>{activeDoc?.title}</strong> and click "Generate Summary". The small-model harness will summarize individual chunk batches and combine them into an executive overview.
+          <div className="border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center text-slate-400">
+            <Layers className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-xs">
+              Select a single document or group above, then click "Generate Summary".
             </p>
           </div>
         )

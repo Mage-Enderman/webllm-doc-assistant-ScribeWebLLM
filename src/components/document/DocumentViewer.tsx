@@ -8,6 +8,7 @@ import {
   Layers,
   Sparkles,
   ExternalLink,
+  Trash2,
 } from 'lucide-react';
 import { ChunkItem, DocumentItem } from '../../lib/types';
 import { db } from '../../lib/db';
@@ -16,12 +17,14 @@ interface DocumentViewerProps {
   document: DocumentItem | null;
   highlightChunkId?: string | null;
   onClose: () => void;
+  onDeleteDoc?: (docId: string) => void;
 }
 
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   document,
   highlightChunkId,
   onClose,
+  onDeleteDoc,
 }) => {
   const [chunks, setChunks] = useState<ChunkItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,13 +82,30 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           </span>
         </div>
 
-        <button
-          onClick={onClose}
-          className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          title="Close Document View"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {onDeleteDoc && (
+            <button
+              onClick={() => {
+                if (confirm(`Remove "${document.title}" and all its data from the app?`)) {
+                  onDeleteDoc(document.id);
+                  onClose();
+                }
+              }}
+              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+              title="Delete Document"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="Close Document View"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* Document Search / Filter Bar */}

@@ -159,16 +159,19 @@ Key bullet points:`;
 }
 
 /**
- * Creates prompt for Reduce step of hierarchical summarization
+ * Creates prompt for Reduce step of hierarchical summarization (single or multi-document)
  */
-export function buildFinalSummaryPrompt(intermediatePoints: string[], docTitle: string): { system: string; user: string } {
-  const system = `You are a synthesis specialist. Transform the following collected key points from the document "${docTitle}" into a clean, comprehensive structured summary.
+export function buildFinalSummaryPrompt(
+  intermediatePoints: string[],
+  docTitleOrGroup: string
+): { system: string; user: string } {
+  const system = `You are an executive synthesis specialist. Transform the collected points from "${docTitleOrGroup}" into a clean, comprehensive structured summary.
 Output sections:
-1. **TL;DR**: A 2-sentence quick summary.
-2. **Executive Summary**: A cohesive 2-paragraph overview.
-3. **Core Highlights**: Bulleted list of the most critical takeaways.`;
+1. **TL;DR**: A 2-sentence overarching quick summary.
+2. **Executive Summary**: A cohesive multi-paragraph overview synthesizing key findings across the material.
+3. **Core Highlights & Takeaways**: Bulleted list of the most critical facts and principles.`;
 
-  const user = `Collected document key points:
+  const user = `Collected key points:
 ${intermediatePoints.join('\n')}
 
 Synthesized structured summary:`;
@@ -177,12 +180,35 @@ Synthesized structured summary:`;
 }
 
 /**
- * Creates prompt for generating Smart Study Notes
+ * Creates prompt for multi-document synthesis across individual document summaries
  */
-export function buildSmartNotesPrompt(contextText: string, docTitle: string): { system: string; user: string } {
+export function buildMultiDocSummaryPrompt(
+  docSummaries: { title: string; summary: string }[]
+): { system: string; user: string } {
+  const system = `You are a comparative research analyst. Synthesize the provided document summaries into a unified multi-document report.
+Format your output as:
+1. **Cross-Document Synthesis**: How these documents connect, overlap, or complement each other.
+2. **Key Findings by Source**: A brief bullet breakdown highlighting what each document contributes.
+3. **Unified Conclusion**: Overarching implications or guidance.`;
+
+  const user = `Document Summaries:
+${docSummaries.map((d, i) => `--- Document ${i + 1}: ${d.title} ---\n${d.summary}`).join('\n\n')}
+
+Multi-Document Unified Report:`;
+
+  return { system, user };
+}
+
+/**
+ * Creates prompt for generating Smart Study Notes (single or multi-document)
+ */
+export function buildSmartNotesPrompt(
+  contextText: string,
+  docTitleOrGroup: string
+): { system: string; user: string } {
   const cleanedContext = cleanTextForSmallModel(contextText);
 
-  const system = `You are an expert study guide creator. Convert the documentation into organized study notes.
+  const system = `You are an expert study guide creator. Convert the documentation from "${docTitleOrGroup}" into organized study notes.
 Format your response exactly as follows:
 ### Core Concepts
 - **[Concept/Term]**: [Definition and significance]
@@ -197,7 +223,7 @@ Format your response exactly as follows:
 - [Question 1 for testing comprehension]
 - [Question 2 for testing comprehension]`;
 
-  const user = `Document: "${docTitle}"
+  const user = `Scope: "${docTitleOrGroup}"
 Context:
 ${cleanedContext}
 

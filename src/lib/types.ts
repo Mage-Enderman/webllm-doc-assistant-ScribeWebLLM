@@ -12,6 +12,13 @@ export interface DocumentItem {
   pageCount?: number;
 }
 
+export interface DocumentGroup {
+  id: string;
+  name: string;
+  docIds: string[];
+  createdAt: number;
+}
+
 export interface ChunkMetadata {
   page?: number;
   heading?: string;

@@ -22,16 +22,20 @@ import { DocumentViewer } from '../document/DocumentViewer';
 
 interface ChatViewProps {
   documents: DocumentItem[];
-  selectedDocId: string | null;
+  selectedDocId?: string | null;
+  selectedDocIds?: string[];
   modelStatus: ModelStatus;
   onInitializeModel: () => void;
+  onDeleteDoc?: (docId: string) => void;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({
   documents,
   selectedDocId,
+  selectedDocIds = [],
   modelStatus,
   onInitializeModel,
+  onDeleteDoc,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -102,9 +106,16 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
     try {
       // 1. Hybrid Search via Small-Model Harness
+      const effectiveFilter =
+        selectedDocIds && selectedDocIds.length > 0
+          ? selectedDocIds
+          : selectedDocId
+          ? [selectedDocId]
+          : undefined;
+
       const searchResults = await globalRetriever.search(query, {
-        topK: 5,
-        docIdFilter: selectedDocId || undefined,
+        topK: 6,
+        docIdsFilter: effectiveFilter,
       });
 
       // 2. Strict Context Assembly & Deduplication
@@ -188,9 +199,15 @@ export const ChatView: React.FC<ChatViewProps> = ({
           <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 min-w-0">
             <BookOpen className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
             <span className="truncate">
-              Active Context Scope:{' '}
+              Active Scope:{' '}
               <strong className="text-slate-900 dark:text-white">
-                {selectedDoc ? selectedDoc.title : 'All Loaded Documents'}
+                {selectedDocIds.length > 1
+                  ? `Group (${selectedDocIds.length} docs selected)`
+                  : selectedDocIds.length === 1
+                  ? documents.find((d) => d.id === selectedDocIds[0])?.title || 'Selected Document'
+                  : selectedDoc
+                  ? selectedDoc.title
+                  : `All Documents (${documents.length})`}
               </strong>
             </span>
           </div>
@@ -368,6 +385,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             document={viewingDoc || selectedDoc || documents[0] || null}
             highlightChunkId={highlightChunkId}
             onClose={() => setShowSplitView(false)}
+            onDeleteDoc={onDeleteDoc}
           />
         </div>
       )}

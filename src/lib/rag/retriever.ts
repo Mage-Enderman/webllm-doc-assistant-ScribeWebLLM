@@ -5,7 +5,8 @@ import { cosineSimilarity, generateEmbedding } from './embeddings';
 export interface RetrievalOptions {
   topK?: number;
   minScore?: number;
-  docIdFilter?: string;
+  docIdFilter?: string | string[];
+  docIdsFilter?: string[];
   rrfK?: number; // constant for RRF (default 60)
   alpha?: number; // weighting between dense (alpha) and sparse (1 - alpha)
 }
@@ -46,11 +47,13 @@ export class HybridRetriever {
   }
 
   /**
-   * Remove chunks for a specific document
+   * Remove chunks for a specific document or list of documents
    */
-  public removeDocChunks(docId: string) {
-    const toRemove = this.chunks.filter((c) => c.docId === docId);
-    this.chunks = this.chunks.filter((c) => c.docId !== docId);
+  public removeDocChunks(docId: string | string[]) {
+    const ids = Array.isArray(docId) ? docId : [docId];
+    const idSet = new Set(ids);
+    const toRemove = this.chunks.filter((c) => idSet.has(c.docId));
+    this.chunks = this.chunks.filter((c) => !idSet.has(c.docId));
     if (toRemove.length > 0) {
       this.miniSearch.discardAll(toRemove.map((c) => c.id));
     }
@@ -60,22 +63,38 @@ export class HybridRetriever {
    * Execute Hybrid Search: Dense Cosine Similarity + BM25 Lexical with Reciprocal Rank Fusion
    */
   public async search(query: string, options: RetrievalOptions = {}): Promise<SearchResult[]> {
-    const { topK = 5, docIdFilter, rrfK = 60 } = options;
+    const { topK = 5, docIdFilter, docIdsFilter, rrfK = 60 } = options;
 
     if (!query || query.trim().length === 0 || this.chunks.length === 0) {
       return [];
     }
 
-    // Filter available chunks if a docIdFilter is specified
-    const activeChunks = docIdFilter
-      ? this.chunks.filter((c) => c.docId === docIdFilter)
+    // Determine target documents for filtering
+    const targetDocIds: string[] = [];
+    if (docIdsFilter && docIdsFilter.length > 0) {
+      targetDocIds.push(...docIdsFilter);
+    }
+    if (docIdFilter) {
+      if (Array.isArray(docIdFilter)) {
+        targetDocIds.push(...docIdFilter);
+      } else {
+        targetDocIds.push(docIdFilter);
+      }
+    }
+
+    const hasDocFilter = targetDocIds.length > 0;
+    const filterSet = new Set(targetDocIds);
+
+    // Filter available chunks if document filter is specified
+    const activeChunks = hasDocFilter
+      ? this.chunks.filter((c) => filterSet.has(c.docId))
       : this.chunks;
 
     if (activeChunks.length === 0) return [];
 
     // 1. BM25 Sparse Search via MiniSearch
     let bm25Results = this.miniSearch.search(query, {
-      filter: docIdFilter ? (result) => result.docId === docIdFilter : undefined,
+      filter: hasDocFilter ? (result) => filterSet.has(result.docId) : undefined,
     });
     // Map BM25 ranking (1-based rank)
     const bm25RankMap = new Map<string, number>();

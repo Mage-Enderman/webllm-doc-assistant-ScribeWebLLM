@@ -27,7 +27,8 @@ import {
 
 interface FlashcardViewProps {
   documents: DocumentItem[];
-  selectedDocId: string | null;
+  selectedDocId?: string | null;
+  selectedDocIds?: string[];
   modelStatus: ModelStatus;
   onInitializeModel: () => void;
 }
@@ -35,12 +36,15 @@ interface FlashcardViewProps {
 export const FlashcardView: React.FC<FlashcardViewProps> = ({
   documents,
   selectedDocId,
+  selectedDocIds = [],
   modelStatus,
   onInitializeModel,
 }) => {
-  const [activeDocId, setActiveDocId] = useState<string>(
-    selectedDocId || 'all'
-  );
+  const [activeDocId, setActiveDocId] = useState<string>(() => {
+    if (selectedDocIds.length > 1) return 'group';
+    if (selectedDocId) return selectedDocId;
+    return 'all';
+  });
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [viewMode, setViewMode] = useState<'study' | 'browse'>('study');
   const [studyFilter, setStudyFilter] = useState<'due' | 'all'>('due');
@@ -71,6 +75,8 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
       let cards: Flashcard[] = [];
       if (activeDocId === 'all') {
         cards = await db.flashcards.toArray();
+      } else if (activeDocId === 'group' && selectedDocIds.length > 0) {
+        cards = await db.flashcards.where('docId').anyOf(selectedDocIds).toArray();
       } else {
         cards = await db.flashcards.where('docId').equals(activeDocId).toArray();
       }
@@ -80,17 +86,19 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     } catch (err) {
       console.error('Failed to load flashcards:', err);
     }
-  }, [activeDocId]);
+  }, [activeDocId, selectedDocIds]);
 
   useEffect(() => {
     loadFlashcards();
   }, [loadFlashcards]);
 
   useEffect(() => {
-    if (selectedDocId) {
+    if (selectedDocIds.length > 1) {
+      setActiveDocId('group');
+    } else if (selectedDocId) {
       setActiveDocId(selectedDocId);
     }
-  }, [selectedDocId]);
+  }, [selectedDocIds, selectedDocId]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -185,8 +193,19 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
   // AI Generation of flashcards
   const handleGenerateCards = async () => {
-    const targetDoc = documents.find((d) => d.id === (activeDocId === 'all' ? documents[0]?.id : activeDocId));
-    if (!targetDoc) return;
+    const targetDocs: DocumentItem[] = [];
+    if (activeDocId === 'group') {
+      targetDocs.push(...documents.filter((d) => selectedDocIds.includes(d.id)));
+    } else if (activeDocId === 'all') {
+      targetDocs.push(...documents);
+    } else {
+      const doc = documents.find((d) => d.id === activeDocId);
+      if (doc) targetDocs.push(doc);
+    }
+    if (targetDocs.length === 0 && documents.length > 0) {
+      targetDocs.push(documents[0]);
+    }
+    if (targetDocs.length === 0) return;
 
     if (modelStatus.state !== 'ready') {
       onInitializeModel();
@@ -197,17 +216,18 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     setGenProgress({
       current: 0,
       total: cardCountToGenerate,
-      message: 'Sampling key chunks...',
+      message: 'Sampling key chunks across scope...',
     });
 
     try {
+      const targetDocIds = targetDocs.map((d) => d.id);
       const allChunks = await db.chunks
         .where('docId')
-        .equals(targetDoc.id)
+        .anyOf(targetDocIds)
         .sortBy('chunkIndex');
 
       if (allChunks.length === 0) {
-        throw new Error('No chunks found for this document.');
+        throw new Error('No chunks found for the selected scope.');
       }
 
       // Sample evenly
@@ -233,6 +253,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         });
 
         const chunk = selectedChunks[i];
+        const sourceDoc = targetDocs.find((d) => d.id === chunk.docId) || targetDocs[0];
         const { system, user } = buildSingleFlashcardPrompt(chunk.text);
 
         const rawJson = await llmEngine.completeChat(
@@ -246,7 +267,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
           }
         );
 
-        const parsed = parseFlashcardItems(rawJson, targetDoc.id, targetDoc.title);
+        const parsed = parseFlashcardItems(rawJson, sourceDoc.id, sourceDoc.title);
         for (const card of parsed) {
           generatedCards.push(card);
           await db.flashcards.put(card);
@@ -403,13 +424,18 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         {/* Action Controls & Mode Switcher */}
         <div className="max-w-6xl mx-auto mt-4 flex flex-col md:flex-row md:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800/60">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Document Select */}
+            {/* Scope / Group Select */}
             <select
               value={activeDocId}
               onChange={(e) => setActiveDocId(e.target.value)}
               className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="all">📚 All Documents ({stats.total} cards)</option>
+              {selectedDocIds.length > 1 && (
+                <option value="group">
+                  📁 Active Group ({selectedDocIds.length} docs)
+                </option>
+              )}
               {documents.map((d) => (
                 <option key={d.id} value={d.id}>
                   📄 {d.title}
