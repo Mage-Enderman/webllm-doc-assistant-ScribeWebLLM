@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:298d46e698f52086aee388ce3f79ccddced1fc358441a3e521c6b2a15ec36114",
+  "claims": [
+    {
+      "id": "claim_412da070fadb4c30946a0f8f1e75f651",
+      "statement": "DocuBrain AI operates entirely client-side without backend servers, combining WebLLM, Transformers.js, MiniSearch, and Dexie IndexedDB.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L12-L24",
+          "version": "repo-lines-v1:sha256:cbf4ccb9a80ec5379a7567cf1479786981a22b8993665798599a10009ac22f27:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhM2I0NjlkOWUwOTc1NzIyNDY2NjczNGM5ZWY3YjI1NGQ4ODUzNGY1ZDViYjcwOTg5NjA4MDVjNTUzZGMzMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3YmZkYjJkM2U2NGQ5ZDk1OTljZjFhNzgxOGI5ZGQzMTI0ZTI2ZWFkNDgyYjRjMDEwNTc4NTUxMGY0MjhkNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk3OGFkMzc1YTBiYjI4Mjg2ODc5N2EyZDgyZmUwM2RjZWJkMWI2NjgwZjRkNWM2YjBkNzc5NGRkOTBiN2ZlYTgifQ"
+        },
+        {
+          "resource": "repo://src/App.tsx#L168-L268",
+          "version": "repo-lines-v1:sha256:11da649fc54f984e90a1e3d050c30213c5f3f40c43c11d069765fc9cb5308fc7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5ZmU3MTYyODZmZDk1N2E5MGMyZjdlMzZkZGRlMTczNTAwOTU1NjUxMjUzNmMxMTExNTM2ZWI4MDhkMWU5ZDVjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI4MmYzY2ZkMTFkYTYxNTAxOTdhY2VlZDA4NDA2YWM2NGIwNTAzNDBkZTdiYzA0MTI0YTRjYjdlZmE2NzEzNDBiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4N2QzMTc4MWIwNGY3ZjRlZWUxNjljZDk4Zjk2ODI3ZGM2M2UwN2NiZjc1Mzk1Mjk0NTk5MzViMjMxZDFlNWEyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhYmM3YTJlNTRmNTYzZjZiMjQyMzhjZDUxODk4MDE3Zjc0YzYyOTNiZjM1OWQ2OWRhZTRlZDQxMzE0ODVhN2Y2In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_5311fe3d062e4b7a93d12b4f2e3beb0a",
+      "statement": "The application adapts the RAG workflow of rimc008/Rag_project2 to execute 100% locally in user browsers for deployment on GitHub Pages.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L1-L32",
+          "version": "repo-lines-v1:sha256:ad9b289831f1897f4edfe4bdc940f3cb5ee0ecb9d93364061f8f9f839fab5c47:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiOTdkYzk0OTM5NmU3MTUyYzAxMDcxMmM2YTJiYjUxZTZkNzdmNzg2ODg2NWU4NDQwYjkwMWFhZGQ4NmM3NzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzNDAwZGM2Yjg1Zjc0ZjY4ZGM4NDU3MzYxMTgyNDVjOWZhMTM4MDkwZDU2YmM2OWM5MjRiMGU2Njg2ODI1MDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY3MjViZWU3ODc3ZDRkMzVhNTA2MmExNjg1YjgyMjJhMTIxZTRhMzJhNzUyYTBhMTNhMzQwMGZiMWJiNDYyZjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_28d09bcae5284adb89da3954df989bf0",
+      "statement": "The user interface coordinates WebGPU initialization status, model switching, and real-time streaming token generation.",
+      "evidence": [
+        {
+          "resource": "repo://src/App.tsx#L170-L184",
+          "version": "repo-lines-v1:sha256:beb7d1f97a76c80ff7f24861640604fbe50d9281350dc14982a5bd5b726ec218:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhODUyODgzNmUyZWJlOTlmY2I2ZTI0YjJlYjk3NjI5YjYyOWMzNDBhMmUyYTFjNDlkYjJkMmEwZTdiZWMyNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjZTk1MWI5MzNmMzI5MzRjZjQzZGI3NDZlNTMyYWEwYTRlOGUwMWUwMDYyZWU0NDllNGYwNjM2NTVkYjI3ZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI3MjcwZWY3ZjQxMzM3MTY5Y2ZmNWU4YTExNTY1M2NmZDUxNGFmMGZmNDhiZjZiODQxYTg5ZjA3MTFiMTI2ZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY5OTVlMDNjNTVhZmUyOWI3YzJiOWNiNDc2YmJjMWI5M2M5YWY4ZmQ2MzgyOWNmY2YyZWJjYTUwYjNiNmVkODkifQ"
+        },
+        {
+          "resource": "repo://src/lib/llm/engine.ts#L83-L135",
+          "version": "repo-lines-v1:sha256:98b00f7e03d14e02b2dd7199a5fe7d859cb603afebb78f0559b988a09ca56a71:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyMzAyMTE1OTE1NzA3ZjQ1ZjE0MWQ4MDhmMTQ5ZWM3NDk4ZGYyMzU0YjJiMjA3YThkMzI1Mjk1ZDVkZWI0YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0ZWE5NGZhZDk3YWIzMzM3YzZjZGMzMjk2MTY3YTA3OTE0ZDU5NmZkMDI0Y2M0NzZlOTJhMzBmZTk5NzVjNTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1YWM5MjhmMTNkNWI1NjU3YmNkZGZiMGMyNTMyZDc0ODg1OGE4MTI5ODM2ZjkzM2ViYTczMTY3NjA1ZDg2YmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg3MzAxZTA0ODZlYWJmYTc0MmJmMzg0Njc4NWJiMTEwY2UyNzc4ZGVhNGZiZDMxZTBhNmFiNTk5ODRkZGIwYzYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-26T09:17:38.820Z"
+  }
+}

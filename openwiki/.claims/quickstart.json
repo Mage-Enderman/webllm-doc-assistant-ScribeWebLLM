@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:c1c776d4773d0d46f639e23d4a56f07fdadc28e01b65db3339b0a89b741099d4",
+  "claims": [
+    {
+      "id": "claim_0e77f7506f4f4d25ba5dc1aa7fa2404b",
+      "statement": "DocuBrain AI starts locally via npm run dev on port 5173 without requiring any background services.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L5-L10",
+          "version": "repo-lines-v1:sha256:444617392ac1abf8e90e506b85f30fb8610c468dd3988dfa2e8bd8a437267da1:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjU2ZDgzMDkwYzZmYjkzNDYzYWQ0ZjJmODVmOGNhNTU3NmY3ZTg1ZTEyMWQ5NThhNTM3MThlMjFkOWY3NmU2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2FkYjc5Zjk3ZTU2Y2M3MTA4MDg2ZWYwY2Y1Y2MzOTNmNWRkNzBmYWI4Njg5ODE5ZDc1ZDNlMjE4ZWI1ODhmYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWI2ZTUxNmFhZGE1NDI0N2M2YzFjMzBmZmE3ZDdjOTcyYWRkZWViNzE5MGEzZGJiNDUyYzI1N2YzM2QyYjk1YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2FiYmUxOGNkMmExNTg5NzllNDU4ZmYyMjFiM2MzY2IwZWNkYzFkYTAyYTUwMGU1ZGM2NWU2ZWQ3NDAzMjVmMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_35d0f3361e99456390311e669fa4a296",
+      "statement": "Built-in sample documents allow users to test chunking, embedding, and RAG Q&A with a single click.",
+      "evidence": [
+        {
+          "resource": "repo://src/App.tsx#L116-L130",
+          "version": "repo-lines-v1:sha256:69706e9b2c30578d72f9936bf7440ab6a486c054aaa4e6c76334b9a634f7b3eb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlZmViOTMzYzNkNmI3MjJiYjRkYWY3YjQ5NDAzNGFiYTYxY2Y0NjA5ZjBmMzI3MGE0YWUwZDgzMThmMmNjZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxZTM3MjVkYTAwMmI0NmVkOGI0ZGU4ODAwM2FkOTcxMGRjYWYxOGQ1N2M0NzAxZGMzYmVmZjBiMmM1Y2IxM2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY0YjQ0YjQ1NzdjZDkzMGY3OThhYmRlYTAwMmExNDZkYWY0ODgwYjY5ODU0ZGZlNThkOGJmNWI0OTRmMDczZGEifQ"
+        },
+        {
+          "resource": "repo://src/lib/sampleDocs.ts#L8-L35",
+          "version": "repo-lines-v1:sha256:73c8ce4c5c7062507cc0869a7ea7a1230966366b26dce8b130b85089fb714a0f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxMTFmMjM5YWM2NWM5ZmVjZDRmNzk3NWQ0ZWUwYzY3N2I1OGE4ZWE2Nzg1MmVhMjVkMjc5MjM5MjUxOGQyZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmZWE4Nzc0YjQwODAwZDljNzUwNWVkOTM2Mjk4YjJiMTZiYzc5MjY1NTUzNTUyNzhlNTFhNGM0ZDhjY2YzNTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMGM0OTEzYWE3ZjM5NmI5OGZhOTA5ZDM3NDEyMWY5NWYxNWZhNTZjN2U0NmI1NWNhNWM0NTM1NzY4NzA3MTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdiOWY3ZTNhNjFjNmFmMDA3OWVkMDRjMDMxMjIyMTdlODNlMmMyNGRkYjA1YmI1ZTk0ZDRlOTc1NzdiNWIyMDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_26a5f1979d3146e485301efd5c4b123e",
+      "statement": "GitHub Pages deployment is automated using a GitHub Actions workflow targeting the dist build directory.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy.yml#L1-L38",
+          "version": "repo-lines-v1:sha256:0d1e9e474f3518c46195e61e21d793e292589c8f422e375bf5d43111b3ad8c55:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5OGI4YWRjMjU4MjA0MTAxYmUxM2M4OGYxNjM5MDc5ZTY0NTNiNzM1MTBhNDYxM2MwOTM4MjdkYjYwOWUwMjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwMjczNjc0ZDVkZDM5ZGFjNDVkNWQxMGUzZTIwODc1MTYwMjBjZmNjOTQzMDJkYzNkMzBkZTA4NjE3ZjhiNWIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-26T09:17:38.820Z"
+  }
+}

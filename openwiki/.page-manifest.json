@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/ingestion-and-storage.md": {
+      "pageVersion": "sha256:05dd8818888fe865c9e2dc2bcb8d96141d49f6498b801d7adc5e675c027c5c82",
+      "completedBy": "antigravity",
+      "completedRunId": "224be283-f822-461f-aee1-4334f373318c",
+      "gitHead": "cf41edfe4cc089f0cc14896281724e9d1c8b0c42",
+      "sourceFingerprint": "sha256:c9ba3faeb8acc02f9d69f4f6550fd8c401e8afcb4722b39c73d7ab94f7e319d3"
+    },
+    "/openwiki/models-and-webgpu.md": {
+      "pageVersion": "sha256:5e7880de8b7d0ca76f4c735a1799dba1fe963f7cb10dde477f4d8802babb86d8",
+      "completedBy": "antigravity",
+      "completedRunId": "224be283-f822-461f-aee1-4334f373318c",
+      "gitHead": "cf41edfe4cc089f0cc14896281724e9d1c8b0c42",
+      "sourceFingerprint": "sha256:c9ba3faeb8acc02f9d69f4f6550fd8c401e8afcb4722b39c73d7ab94f7e319d3"
+    },
+    "/openwiki/overview.md": {
+      "pageVersion": "sha256:298d46e698f52086aee388ce3f79ccddced1fc358441a3e521c6b2a15ec36114",
+      "completedBy": "antigravity",
+      "completedRunId": "224be283-f822-461f-aee1-4334f373318c",
+      "gitHead": "cf41edfe4cc089f0cc14896281724e9d1c8b0c42",
+      "sourceFingerprint": "sha256:c9ba3faeb8acc02f9d69f4f6550fd8c401e8afcb4722b39c73d7ab94f7e319d3"
+    },
+    "/openwiki/quickstart.md": {
+      "pageVersion": "sha256:c1c776d4773d0d46f639e23d4a56f07fdadc28e01b65db3339b0a89b741099d4",
+      "completedBy": "antigravity",
+      "completedRunId": "224be283-f822-461f-aee1-4334f373318c",
+      "gitHead": "cf41edfe4cc089f0cc14896281724e9d1c8b0c42",
+      "sourceFingerprint": "sha256:c9ba3faeb8acc02f9d69f4f6550fd8c401e8afcb4722b39c73d7ab94f7e319d3"
+    },
+    "/openwiki/rag-and-small-model-harness.md": {
+      "pageVersion": "sha256:0c47a1e3e55ba8e0dee1056190833eb6a5321ead6bfa30e2baa33b8e34e111a9",
+      "completedBy": "antigravity",
+      "completedRunId": "224be283-f822-461f-aee1-4334f373318c",
+      "gitHead": "cf41edfe4cc089f0cc14896281724e9d1c8b0c42",
+      "sourceFingerprint": "sha256:c9ba3faeb8acc02f9d69f4f6550fd8c401e8afcb4722b39c73d7ab94f7e319d3"
+    },
+    "/openwiki/ui-and-learning-suite.md": {
+      "pageVersion": "sha256:c4c5a81a27a7d26f9a37cd61666962bad679e37daf9d061fd4b937659fa100db",
+      "completedBy": "antigravity",
+      "completedRunId": "224be283-f822-461f-aee1-4334f373318c",
+      "gitHead": "cf41edfe4cc089f0cc14896281724e9d1c8b0c42",
+      "sourceFingerprint": "sha256:c9ba3faeb8acc02f9d69f4f6550fd8c401e8afcb4722b39c73d7ab94f7e319d3"
+    }
+  }
+}
