@@ -1,4 +1,4 @@
-import { ChunkItem, CitationItem, KeyConcept, QuizQuestion, SearchResult, SectionSummary } from '../types';
+import { ChunkItem, CitationItem, Flashcard, KeyConcept, QuizQuestion, SearchResult, SectionSummary } from '../types';
 
 export interface ContextBudgetConfig {
   maxContextTokens: number;
@@ -386,4 +386,116 @@ export function parseQuizQuestions(rawText: string): QuizQuestion[] {
   }
 
   return [];
+}
+
+/**
+ * Prompt for generating focused flashcards from a single concept snippet
+ */
+export function buildSingleFlashcardPrompt(snippet: string): { system: string; user: string } {
+  const cleaned = cleanTextForSmallModel(snippet).slice(0, 700);
+
+  const system = `You are an educational flashcard creator. Convert the text into 1 or 2 high-yield study flashcards.
+RULES:
+1. Output valid JSON array ONLY.
+2. "front": A clear, concise concept question or prompt.
+3. "back": A crisp, direct 1-to-2 sentence factual answer.
+
+JSON format:
+[
+  {
+    "front": "What is...",
+    "back": "It is..."
+  }
+]`;
+
+  const user = `Text:
+${cleaned}
+
+Flashcards in JSON:`;
+
+  return { system, user };
+}
+
+/**
+ * Parses flashcards from model output
+ */
+export function parseFlashcardItems(rawText: string, docId: string, docTitle: string): Flashcard[] {
+  const sanitized = sanitizeJsonString(rawText);
+  let parsed: any = null;
+
+  try {
+    parsed = JSON.parse(sanitized);
+  } catch {
+    const match = sanitized.match(/\[\s*\{[\s\S]*\}\s*\]/) || sanitized.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        const candidate = JSON.parse(sanitizeJsonString(match[0]));
+        parsed = Array.isArray(candidate) ? candidate : [candidate];
+      } catch {
+        // Fallback below
+      }
+    }
+  }
+
+  const items = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+  const results: Flashcard[] = [];
+
+  for (const item of items) {
+    if (item && item.front && item.back) {
+      results.push({
+        id: `card_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        docId,
+        docTitle,
+        front: String(item.front).trim(),
+        back: String(item.back).trim(),
+        interval: 1,
+        repetition: 0,
+        easeFactor: 2.5,
+        dueDate: Date.now(),
+        createdAt: Date.now(),
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * SuperMemo-2 (SM-2) Spaced Repetition Algorithm
+ */
+export function calculateNextReview(
+  card: Flashcard,
+  grade: 'again' | 'good' | 'easy'
+): { interval: number; repetition: number; easeFactor: number; dueDate: number } {
+  let { repetition, interval, easeFactor } = card;
+
+  if (grade === 'again') {
+    repetition = 0;
+    interval = 1;
+    easeFactor = Math.max(1.3, easeFactor - 0.2);
+  } else if (grade === 'good') {
+    if (repetition === 0) {
+      interval = 1;
+    } else if (repetition === 1) {
+      interval = 3;
+    } else {
+      interval = Math.round(interval * easeFactor);
+    }
+    repetition += 1;
+  } else if (grade === 'easy') {
+    if (repetition === 0) {
+      interval = 2;
+    } else if (repetition === 1) {
+      interval = 6;
+    } else {
+      interval = Math.round(interval * easeFactor * 1.3);
+    }
+    repetition += 1;
+    easeFactor = Math.max(1.3, easeFactor + 0.15);
+  }
+
+  const now = Date.now();
+  const dueDate = now + interval * 86400000;
+
+  return { interval, repetition, easeFactor, dueDate };
 }

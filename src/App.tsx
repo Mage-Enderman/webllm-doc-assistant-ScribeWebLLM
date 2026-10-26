@@ -13,6 +13,7 @@ import { ChatView } from './components/views/ChatView';
 import { SummaryView } from './components/views/SummaryView';
 import { NotesView } from './components/views/NotesView';
 import { QuizView } from './components/views/QuizView';
+import { FlashcardView } from './components/views/FlashcardView';
 import { InspectorView } from './components/views/InspectorView';
 import { Menu } from 'lucide-react';
 
@@ -253,6 +254,15 @@ export const App: React.FC = () => {
 
             {activeTab === 'quiz' && (
               <QuizView
+                documents={documents}
+                selectedDocId={selectedDocId}
+                modelStatus={modelStatus}
+                onInitializeModel={handleInitializeModel}
+              />
+            )}
+
+            {activeTab === 'flashcards' && (
+              <FlashcardView
                 documents={documents}
                 selectedDocId={selectedDocId}
                 modelStatus={modelStatus}

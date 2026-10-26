@@ -96,6 +96,19 @@ export interface SectionSummary {
   summary: string;
 }
 
+export interface Flashcard {
+  id: string;
+  docId: string;
+  docTitle: string;
+  front: string;
+  back: string;
+  interval: number; // days
+  repetition: number;
+  easeFactor: number;
+  dueDate: number; // timestamp
+  createdAt: number;
+}
+
 export interface SummaryResult {
   id: string;
   docId: string;
