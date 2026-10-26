@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:05dd8818888fe865c9e2dc2bcb8d96141d49f6498b801d7adc5e675c027c5c82",
+  "pageVersion": "sha256:efe3ef98e5f112bcdfbef144520404cca9360849824d2d0945a48354c9fa7812",
   "claims": [
     {
       "id": "claim_ce29f03459f44b13ba6eb19ca0ab4ca1",
@@ -34,17 +34,27 @@
     },
     {
       "id": "claim_660b7f08bd0346a49ae2df75b0e0682e",
-      "statement": "DocuBrainDatabase uses Dexie to persist documents, chunks, chat messages, quizzes, notes, and summaries across IndexedDB tables.",
+      "statement": "ScribeWebLLMDatabase uses Dexie to persist documents, chunks, chat messages, quizzes, notes, summaries, and flashcards in IndexedDB.",
       "evidence": [
         {
-          "resource": "repo://src/lib/db.ts#L4-L24",
-          "version": "repo-lines-v1:sha256:9fbea07b0a058fd7859b61739b4221171c3a5d358a5e7c9d89a6b7287a17c397:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4NmMzYjNkNTk3MDRiYzdkZmJmMzAwOWIxZDMyNGRlYWIxYTNmODczNTJiYWJjNTFiNmQ2MjdlMTVkMzQ2NTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4NTYxM2I5MjUyMGYzNzYxMjY3NjE2NDhkNDg1MDUzODg0ZmEyZTE2ODI4YjE4MjhmZmFjZTI4OWVmNjVmMWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2YzE2ODg1NjMwYjkxYmY4YWI5OGQxZDg3MTkwZWJkM2RmMDlmZDEyNWJmMDVkYWMwMmU1MWYxNjU2NTFiNTQifQ"
+          "resource": "repo://src/lib/db.ts#L12-L42",
+          "version": "repo-lines-v1:sha256:3191bc03383a767e4231e6570734e3dbac12fbba1d2afedebde5bf5d39a28d67:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4ZTczNWJiZDM5ZmM0MTllNTM4MDcyYTAzMTMzZWFhZGQyNGE0ZGY1Y2NiNTc2N2U5MjA3MTFhZjc4YzhiYjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3ZDZmNWQ1MzQ3MDNlYTAzMjcyZjIxNThiNGM5NzM1OGQwOGYyNGI2MWI2Y2MyODBkMTNkNzU0ZmFlYmE1Y2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiZTMyN2IyMzJiNDM1NzM3Y2NjMWEzNzM5NTNmZGZjN2E4MGM5NjE0NzVmOWFmNWVhN2Q1MDhmMDc0YmIzZDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e7cb9cc2648a4840ae71a41a0af79d32",
+      "statement": "deleteDocumentsWithChunks provides transactional deletion of multiple documents and their associated chunks, quizzes, notes, summaries, and flashcards.",
+      "evidence": [
+        {
+          "resource": "repo://src/lib/db.ts#L70-L93",
+          "version": "repo-lines-v1:sha256:651a01cb4bda44cd146c2a211ae04c6987bda6eaba9676a302c06fbaa46e878f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhMWE4ZGY1NzQ0MDI0MjRmMWNlZGRkYzE4ZTMwYzY2N2FjYmI0ODkwZTM0ZGU4N2U0N2EyMmY4MjU0ZTIxZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzNjhmNWEwZGVjYTg1MTA2MTFhZmE4NDk2OWRhMDM1MTg1NTMyNDE1MjlhMDU4ZjdkN2RiMTAzMTRiMjM0ZWYifQ"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-26T09:17:38.820Z"
+    "at": "2026-10-26T10:46:08.317Z"
   }
 }

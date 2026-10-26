@@ -1,11 +1,8 @@
 ---
 type: guide
-title: DocuBrain AI Quickstart & Deployment
-description: Quickstart tutorial for launching DocuBrain AI locally with Vite and deploying to GitHub Pages with GitHub Actions.
+title: Quickstart & Developer Guide
+description: Quickstart tutorial for launching ScribeWebLLM locally with Vite and deploying to GitHub Pages with GitHub Actions.
 tags: [quickstart, installation, deployment, github-pages, webgpu]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-26T09:17:38.820Z
 sources:
   - id: openwiki-source-6766b7a0c14857435d2077c9
     resource: repo://.github/workflows/deploy.yml
@@ -15,18 +12,21 @@ sources:
     resource: repo://src/App.tsx
   - id: openwiki-source-26a04cd79dd1c5eabee1375d
     resource: repo://src/lib/sampleDocs.ts
-generated: { by: "antigravity", at: "2026-10-26T09:17:38.820Z" }
+generated: { by: "antigravity", at: "2026-10-26T10:33:50.945Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-26T10:46:08.317Z
 ---
 
-# DocuBrain AI Quickstart & Deployment
+# Quickstart & Developer Guide
 
-This guide walks through setting up DocuBrain AI locally on your development machine and publishing it as a live, free **GitHub Pages** web application.
+This guide walks through setting up ScribeWebLLM locally on your development machine and publishing it as a live, free **GitHub Pages** web application.
 
 ---
 
 ## 1. Prerequisites & Browser Support
 
-DocuBrain AI executes neural models directly in the browser via **WebGPU**:
+ScribeWebLLM executes neural models directly in the browser via **WebGPU**:
 - **Supported Browsers**:
   - Google Chrome 113+ (Windows, macOS, Linux, Android)
   - Microsoft Edge 113+ (Windows, macOS)
@@ -73,19 +73,20 @@ Open `http://localhost:5173` in your browser.
 4. **Test the Learning Suite**:
    - Click **AI Summaries** and trigger **"Generate Summary"** to watch the Map-Reduce pipeline.
    - Click **Quiz Arena** and click **"Start Quiz"** to experience progressive 4-choice questions with celebratory confetti.
+   - Click **Flashcards** to review auto-generated flashcards with SM-2 spaced repetition (Again / Good / Easy).
 
 ---
 
 ## 4. Publishing to GitHub Pages
 
-DocuBrain AI is a pure client-side application and includes a pre-configured GitHub Actions workflow ([`.github/workflows/deploy.yml`](file:///E:/0-Antigravity/0-webllm/.github/workflows/deploy.yml)).
+ScribeWebLLM is a pure client-side application and includes a pre-configured GitHub Actions workflow ([`.github/workflows/deploy.yml`](file:///E:/0-Antigravity/0-webllm/.github/workflows/deploy.yml)).
 
 ### Deployment Steps:
 1. Initialize git and commit your project:
    ```bash
    git init
    git add .
-   git commit -m "Deploy DocuBrain AI to GitHub Pages"
+   git commit -m "Deploy ScribeWebLLM to GitHub Pages"
    git branch -M main
    git remote add origin https://github.com/<your-username>/<your-repo-name>.git
    git push -u origin main

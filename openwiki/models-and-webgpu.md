@@ -1,11 +1,8 @@
 ---
 type: concept
-title: WebLLM & Embedding Models (Gemma 4 & EmbeddingGemma 2)
+title: WebGPU & In-Browser Model Inference
 description: Technical architecture for in-browser WebGPU execution via WebLLM, model caching, Google DeepMind Gemma 4 E2B/E4B, and EmbeddingGemma 2 270M vector embeddings.
 tags: [webllm, webgpu, gemma, gemma4, embeddinggemma, transformers, mlc]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-26T09:17:38.820Z
 sources:
   - id: openwiki-source-c30e4deae9f02bbc4a2e69b3
     resource: repo://src/lib/llm/engine.ts
@@ -13,12 +10,15 @@ sources:
     resource: repo://src/lib/llm/webllmWorker.ts
   - id: openwiki-source-015589cc7b2240c9fdcf3bb0
     resource: repo://src/lib/rag/embeddings.ts
-generated: { by: "antigravity", at: "2026-10-26T09:17:38.820Z" }
+generated: { by: "antigravity", at: "2026-10-26T10:33:50.945Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-26T10:46:08.317Z
 ---
 
-# WebLLM & Embedding Models (Gemma 4 & EmbeddingGemma 2)
+# WebGPU & In-Browser Model Inference
 
-This document provides technical specifications for in-browser neural execution using **WebLLM** (`@mlc-ai/web-llm`) with **WebGPU**, Google DeepMind's **Gemma 4** model variants, and the **EmbeddingGemma 2** (270M) vector embedding engine.
+This document provides technical specifications for in-browser neural execution using **WebLLM** (`@mlc-ai/web-llm`) with **WebGPU**, Google DeepMind's **Gemma 4** model variants, and the **EmbeddingGemma 2** (270M) vector embedding engine in ScribeWebLLM.
 
 ---
 
@@ -34,7 +34,7 @@ WebLLM executes quantized language models locally on the user's GPU using the W3
 
 ## 2. Supported Language Models Catalog
 
-DocuBrain AI offers a diverse catalog of small, browser-optimized models:
+ScribeWebLLM offers a diverse catalog of small, browser-optimized models:
 
 | Model ID | Display Name | Effective Parameters | VRAM Footprint | Architecture & Highlights |
 | :--- | :--- | :--- | :--- | :--- |
@@ -65,7 +65,7 @@ Embedding generation is implemented in [`src/lib/rag/embeddings.ts`](file:///E:/
 
 ## 4. Fallback Embedding Engine (`all-MiniLM-L6-v2`)
 
-For resource-constrained devices, DocuBrain AI provides `Xenova/all-MiniLM-L6-v2`:
+For resource-constrained devices, ScribeWebLLM provides `Xenova/all-MiniLM-L6-v2`:
 - Footprint: ~80 MB download.
 - Output: 384-dimensional normalized dense vectors.
 - Context Window: 512 tokens.

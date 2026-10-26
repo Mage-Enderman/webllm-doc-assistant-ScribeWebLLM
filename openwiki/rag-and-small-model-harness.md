@@ -1,11 +1,8 @@
 ---
 type: concept
-title: Small-Model RAG Harness & Hybrid Retrieval
+title: RAG Retrieval & Small Model Robustness Harness
 description: Technical architecture of the Small-Model Harness, featuring Hybrid Dense-BM25 Reciprocal Rank Fusion, context pre-cleaning, strict budgeting, Map-Reduce summarization, and progressive quiz micro-tasking.
 tags: [rag, hybrid-search, rrf, minisearch, embeddings, harness, map-reduce]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-26T09:17:38.820Z
 sources:
   - id: openwiki-source-580abd72d173230c6f842464
     resource: repo://src/components/views/QuizView.tsx
@@ -15,20 +12,23 @@ sources:
     resource: repo://src/lib/rag/harness.ts
   - id: openwiki-source-fac1b9700e86dde836ccce88
     resource: repo://src/lib/rag/retriever.ts
-generated: { by: "antigravity", at: "2026-10-26T09:17:38.820Z" }
+generated: { by: "antigravity", at: "2026-10-26T10:33:50.945Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-26T10:46:08.317Z
 ---
 
-# Small-Model RAG Harness & Hybrid Retrieval
+# RAG Retrieval & Small Model Robustness Harness
 
 Running neural language models directly in consumer browsers via WebGPU imposes unique engineering constraints: smaller parameter counts (0.5B to 4B parameters), tighter KV caches, and lower tolerance for noisy, disorganized prompt contexts.
 
-This document details the **Small-Model Harness** ([`src/lib/rag/harness.ts`](file:///E:/0-Antigravity/0-webllm/src/lib/rag/harness.ts)) and **Hybrid Retrieval Engine** ([`src/lib/rag/retriever.ts`](file:///E:/0-Antigravity/0-webllm/src/lib/rag/retriever.ts)) engineered to maximize answer accuracy and eliminate hallucinations.
+This document details the **Small-Model Harness** ([`src/lib/rag/harness.ts`](file:///E:/0-Antigravity/0-webllm/src/lib/rag/harness.ts)) and **Hybrid Retrieval Engine** ([`src/lib/rag/retriever.ts`](file:///E:/0-Antigravity/0-webllm/src/lib/rag/retriever.ts)) engineered to maximize answer accuracy and eliminate hallucinations in ScribeWebLLM.
 
 ---
 
 ## 1. Hybrid Retrieval (Dense + BM25 via Reciprocal Rank Fusion)
 
-Pure vector search frequently struggles with exact keywords (such as API identifiers, function names, error codes, and specific numbers), while pure lexical BM25 search misses conceptual synonyms. DocuBrain AI combines both using **Reciprocal Rank Fusion (RRF)**:
+Pure vector search frequently struggles with exact keywords (such as API identifiers, function names, error codes, and specific numbers), while pure lexical BM25 search misses conceptual synonyms. ScribeWebLLM combines both using **Reciprocal Rank Fusion (RRF)**:
 
 ```text
                User Query
@@ -86,7 +86,7 @@ When a user requests an executive summary of a 50+ page document, the document's
 
 1. **Map Stage**:
    - Groups chunks into small batches of 3 chunks (~600 tokens).
-   - Generates 3 concise, high-value bullet points per batch using `buildChunkBatchSummaryPrompt`.
+   - Generates 3 concise, high-value bullet points per batch using `buildChunkBatchSummaryPrompt` / `buildBatchSummaryPrompt`.
    - Displays real-time batch progress in the user interface (`Batch X / Y`).
 2. **Reduce Stage**:
    - Consolidates all intermediate bullet summaries into a single synthesis prompt using `buildFinalSummaryPrompt`.
@@ -101,7 +101,7 @@ When a user requests an executive summary of a 50+ page document, the document's
 
 Generating a multi-question quiz in a single monolithic JSON output often causes small models to experience output fatigue, leading to dropped options (e.g. producing only 2 options instead of 4) or phantom option references in explanations.
 
-DocuBrain AI employs **Progressive Micro-Tasking**:
+ScribeWebLLM employs **Progressive Micro-Tasking**:
 - Spatially samples $N$ distinct concept chunks evenly across the document.
 - Invokes the model sequentially for each chunk with `buildSingleQuestionPrompt`, generating **one question at a time** with a 450-token output limit.
 - **Parser Enforcement (`parseSingleQuizQuestion`)**:

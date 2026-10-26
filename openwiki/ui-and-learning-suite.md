@@ -1,34 +1,38 @@
 ---
 type: concept
-title: User Interface & Interactive Learning Suite
-description: Detailed guide to the five interactive view modes (Chat, Summaries, Notes, Quiz Arena, and Chunk Inspector), UI layout, and automated GitHub Pages deployment.
-tags: [ui, react, tailwind, chat, quiz, summary, notes, inspector, github-pages]
-verified:
-  - by: openwiki/0.7.2
-    at: 2026-10-26T09:17:38.820Z
+title: UI Architecture & Learning Suite Components
+description: Detailed guide to the interactive learning views (Chat, Summaries, Notes, Quiz Arena, Flashcards SM-2 Arena, and Chunk Inspector), DocumentViewer split-screen, and automated GitHub Pages deployment.
+tags: [ui, react, tailwind, chat, quiz, summary, notes, flashcards, sm2, document-viewer, inspector, github-pages]
 sources:
   - id: openwiki-source-6766b7a0c14857435d2077c9
     resource: repo://.github/workflows/deploy.yml
+  - id: openwiki-source-b725917157e81631c3835bea
+    resource: repo://src/components/document/DocumentViewer.tsx
   - id: openwiki-source-b5f74174de8f511bd0137acc
     resource: repo://src/components/views/ChatView.tsx
+  - id: openwiki-source-55ccbbb2fd5e7846e4924c25
+    resource: repo://src/components/views/FlashcardView.tsx
   - id: openwiki-source-4bbd5f70675da13d8c3bd2f1
     resource: repo://src/components/views/InspectorView.tsx
   - id: openwiki-source-580abd72d173230c6f842464
     resource: repo://src/components/views/QuizView.tsx
   - id: openwiki-source-5e1b077422a94ae165e88e4e
     resource: repo://vite.config.ts
-generated: { by: "antigravity", at: "2026-10-26T09:17:38.820Z" }
+generated: { by: "antigravity", at: "2026-10-26T10:33:50.945Z" }
+verified:
+  - by: openwiki/0.7.2
+    at: 2026-10-26T10:46:08.317Z
 ---
 
-# User Interface & Interactive Learning Suite
+# UI Architecture & Learning Suite Components
 
-DocuBrain AI organizes document interactions into five specialized views, complemented by a persistent knowledge base sidebar, dynamic model management banner, and automated GitHub Pages deployment.
+ScribeWebLLM organizes document interactions into specialized learning views, complemented by a persistent knowledge base sidebar with multi-document grouping, split-screen citation viewer, dynamic model management banner, and automated GitHub Pages deployment.
 
 ---
 
 ## 1. Top-Level Layout & Navigation
 
-The application shell ([`src/App.tsx`](file:///E:/0-Antigravity/0-webllm/src/App.tsx)) coordinates four major interface regions:
+The application shell ([`src/App.tsx`](file:///E:/0-Antigravity/0-webllm/src/App.tsx)) coordinates key interface regions:
 1. **Header ([`src/components/Header.tsx`](file:///E:/0-Antigravity/0-webllm/src/components/Header.tsx))**:
    - WebGPU hardware indicator (Active / Missing).
    - Embedding model dropdown (`EmbeddingGemma 2 768D` vs. `all-MiniLM 384D`).
@@ -40,12 +44,16 @@ The application shell ([`src/App.tsx`](file:///E:/0-Antigravity/0-webllm/src/App
    - Explains CacheStorage persistence to reassure users regarding network efficiency.
 3. **Knowledge Base Sidebar ([`src/components/Sidebar.tsx`](file:///E:/0-Antigravity/0-webllm/src/components/Sidebar.tsx))**:
    - Drag & drop ingestion zone supporting `.pdf`, `.md`, and `.txt`.
+   - Multi-document grouping and batch document deletion.
    - "+ Paste Note" modal for custom text or code snippets.
    - 1-click sample document loader.
    - Document search filter and per-document deletion.
-   - Query scope toggle: query all documents or isolate queries to a selected document.
+   - Query scope toggle: query all documents, document groups, or isolate queries to a selected document.
 4. **Navigation Tabs ([`src/components/NavigationTabs.tsx`](file:///E:/0-Antigravity/0-webllm/src/components/NavigationTabs.tsx))**:
-   - Switches between the five primary views below.
+   - Switches between Chat, Summary, Notes, Quiz, Flashcards, and Inspector views.
+5. **Split-Screen Citation Viewer ([`src/components/document/DocumentViewer.tsx`](file:///E:/0-Antigravity/0-webllm/src/components/document/DocumentViewer.tsx))**:
+   - Allows reading source documents side-by-side with chat and study tools.
+   - Automatically highlights and scrolls to cited chunks upon citation chip clicks.
 
 ---
 
@@ -54,7 +62,7 @@ The application shell ([`src/App.tsx`](file:///E:/0-Antigravity/0-webllm/src/App
 ### A. Conversational Grounded Chat (`ChatView.tsx`)
 - **Streaming Output**: Token-by-token streaming powered by WebLLM's `streamChat`.
 - **Grounded Source Attribution**: Every answer renders clickable citation badges (`Source 1 (p.2)`).
-- **Citation Inspection Modal**: Clicking any citation opens a modal displaying the exact raw chunk text snippet and its composite RRF score.
+- **Split-Screen & Modal Citation Inspection**: Clicking any citation previews chunk text with composite RRF scores and highlights the chunk in the document viewer.
 - **Prompt Acceleration Chips**: Built-in prompts ("Summarize the main architectural flow", "What are the limitations?") to jumpstart inquiry.
 
 ### B. Hierarchical AI Summaries (`SummaryView.tsx`)
@@ -73,7 +81,13 @@ The application shell ([`src/App.tsx`](file:///E:/0-Antigravity/0-webllm/src/App
 - **Instant Visual Feedback**: Options turn green upon correct selection or red upon incorrect selection, revealing an immediate explanation box.
 - **Celebration Confetti**: Triggers dynamic canvas confetti upon correct answers and final quiz completion with accuracy percentage.
 
-### E. RAG Chunk Inspector (`InspectorView.tsx`)
+### E. Spaced Repetition Flashcards (`FlashcardView.tsx`)
+- **SM-2 Algorithm Scheduling**: Implements the SuperMemo-2 spaced repetition algorithm with interval, repetition count, and ease factor calculations.
+- **Review Rating**: User grades responses as Again, Good, or Easy to recalibrate review intervals.
+- **Due Date Filtering**: Filter cards by due status for daily study cycles or browse the complete collection.
+- **Card Generation**: Generates question/answer flashcards from document concepts with flip animations.
+
+### F. RAG Chunk Inspector (`InspectorView.tsx`)
 - **Transparency Sandbox**: View total document count, indexed chunk counts, vector dimensions (768D vs 384D), and lexical engine metrics.
 - **Live Hybrid Retrieval Simulator**: Enter test queries to simulate RRF fusion scores, dense similarity, and BM25 rankings side-by-side.
 - **Raw Chunk Explorer**: Inspect every chunk's text, token estimates, and embedding vector status.
@@ -82,7 +96,7 @@ The application shell ([`src/App.tsx`](file:///E:/0-Antigravity/0-webllm/src/App
 
 ## 3. GitHub Pages Deployment (`.github/workflows/deploy.yml`)
 
-Because DocuBrain AI is 100% client-side, it is deployed as a static Single Page Application (SPA):
+Because ScribeWebLLM is 100% client-side, it is deployed as a static Single Page Application (SPA):
 - **Relative Base Path**: `vite.config.ts` sets `base: './'` so all JavaScript, CSS, and WebAssembly assets resolve cleanly under GitHub Pages repository paths (`https://<username>.github.io/<repo>/`).
 - **ES Module Worker**: `worker: { format: 'es' }` preserves module import capabilities in the WebLLM Web Worker.
 - **Automated GitHub Actions Workflow**:

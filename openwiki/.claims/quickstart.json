@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:c1c776d4773d0d46f639e23d4a56f07fdadc28e01b65db3339b0a89b741099d4",
+  "pageVersion": "sha256:420502131b130948436b9f5cbc1d59e2011447d230426aa722279c9f6df8dd54",
   "claims": [
     {
       "id": "claim_0e77f7506f4f4d25ba5dc1aa7fa2404b",
@@ -17,7 +17,7 @@
       "statement": "Built-in sample documents allow users to test chunking, embedding, and RAG Q&A with a single click.",
       "evidence": [
         {
-          "resource": "repo://src/App.tsx#L116-L130",
+          "resource": "repo://src/App.tsx#L118-L132",
           "version": "repo-lines-v1:sha256:69706e9b2c30578d72f9936bf7440ab6a486c054aaa4e6c76334b9a634f7b3eb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlZmViOTMzYzNkNmI3MjJiYjRkYWY3YjQ5NDAzNGFiYTYxY2Y0NjA5ZjBmMzI3MGE0YWUwZDgzMThmMmNjZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxZTM3MjVkYTAwMmI0NmVkOGI0ZGU4ODAwM2FkOTcxMGRjYWYxOGQ1N2M0NzAxZGMzYmVmZjBiMmM1Y2IxM2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY0YjQ0YjQ1NzdjZDkzMGY3OThhYmRlYTAwMmExNDZkYWY0ODgwYjY5ODU0ZGZlNThkOGJmNWI0OTRmMDczZGEifQ"
         },
         {
@@ -39,6 +39,6 @@
   ],
   "verification": {
     "by": "openwiki/0.7.2",
-    "at": "2026-10-26T09:17:38.820Z"
+    "at": "2026-10-26T10:46:08.317Z"
   }
 }

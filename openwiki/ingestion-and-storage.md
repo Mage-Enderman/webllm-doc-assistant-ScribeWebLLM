@@ -1,11 +1,11 @@
 ---
 type: architecture
-title: Document Ingestion & Local Storage
+title: Document Ingestion, Chunking & Client Storage
 description: Client-side document processing pipeline covering PDF parsing with PDF.js, recursive text chunking with overlap, and IndexedDB local storage using Dexie.
 tags: [ingestion, pdf, chunking, indexeddb, dexie, storage]
 verified:
   - by: openwiki/0.7.2
-    at: 2026-10-26T09:17:38.820Z
+    at: 2026-10-26T10:46:08.317Z
 sources:
   - id: openwiki-source-1f2b19471bdc39ae43870944
     resource: repo://src/lib/db.ts
@@ -13,18 +13,18 @@ sources:
     resource: repo://src/lib/ingestion/documentProcessor.ts
   - id: openwiki-source-057e4e6ef94e3c199774cce9
     resource: repo://src/lib/rag/chunker.ts
-generated: { by: "antigravity", at: "2026-10-26T09:17:38.820Z" }
+generated: { by: "antigravity", at: "2026-10-26T10:33:50.945Z" }
 ---
 
-# Document Ingestion & Local Storage
+# Document Ingestion, Chunking & Client Storage
 
-This document details the document ingestion lifecycle, client-side PDF parsing, text chunking mechanics, and persistent IndexedDB storage architecture in DocuBrain AI.
+This document details the document ingestion lifecycle, client-side PDF parsing, text chunking mechanics, and persistent IndexedDB storage architecture in ScribeWebLLM.
 
 ---
 
 ## 1. Document Ingestion Lifecycle
 
-DocuBrain AI processes documents 100% locally in the browser with zero server roundtrips. The processing pipeline is managed by `processAndIngestDocument` in [`src/lib/ingestion/documentProcessor.ts`](file:///E:/0-Antigravity/0-webllm/src/lib/ingestion/documentProcessor.ts).
+ScribeWebLLM processes documents 100% locally in the browser with zero server roundtrips. The processing pipeline is managed by `processAndIngestDocument` in [`src/lib/ingestion/documentProcessor.ts`](file:///E:/0-Antigravity/0-webllm/src/lib/ingestion/documentProcessor.ts).
 
 ```text
 [User File / Note] ──> [Text Extraction] ──> [Recursive Chunker] ──> [Batch Embeddings] ──> [IndexedDB Put]
@@ -69,7 +69,7 @@ Chunking decomposes continuous document prose into discrete, manageable segments
 
 ## 4. IndexedDB Database Schema (`src/lib/db.ts`)
 
-DocuBrain AI uses Dexie.js to interface with the browser's native IndexedDB (`DocuBrainDB`, Version 1):
+ScribeWebLLM uses Dexie.js to interface with the browser's native IndexedDB (`ScribeWebLLMDB`, Version 1 & 2):
 
 | Table | Primary Key | Indexed Fields | Purpose |
 | :--- | :--- | :--- | :--- |
@@ -79,15 +79,17 @@ DocuBrain AI uses Dexie.js to interface with the browser's native IndexedDB (`Do
 | `quizzes` | `id` | `docId`, `createdAt` | Generated quiz questions, user answers, and score tracking |
 | `notes` | `id` | `docId`, `createdAt` | Structured concept notes, key takeaways, and review questions |
 | `summaries` | `id` | `docId`, `createdAt` | Multi-depth summaries and section breakdowns |
+| `flashcards` | `id` | `docId`, `dueDate`, `createdAt` | Spaced repetition flashcards with SM-2 scheduling parameters |
 
 ### Lifecycle Operations
-- **Atomic Document Deletion (`deleteDocumentWithChunks`)**: Deletes the document and all associated chunks, quizzes, notes, and summaries in a single transaction.
+- **Batch Document Deletion (`deleteDocumentsWithChunks`)**: Deletes multiple documents and all corresponding chunks, quizzes, notes, summaries, and flashcards within a single atomic IndexedDB read-write transaction.
+- **Single Document Deletion (`deleteDocumentWithChunks`)**: Convenience wrapper for deleting a single document and its dependent data.
 - **Full Database Purge (`clearAllData`)**: Completely flushes all tables across the active database.
 
 ---
 
 ## 5. Built-in Sample Documents (`src/lib/sampleDocs.ts`)
 
-To enable immediate testing without uploading files, DocuBrain AI bundles pre-configured educational guides:
+To enable immediate testing without uploading files, ScribeWebLLM bundles pre-configured educational guides:
 1. **AI & Retrieval-Augmented Generation (RAG) Handbook**: Technical deep-dive covering RAG phases (ingestion, retrieval, generation), hybrid search, and small model harnesses.
 2. **Quantum Computing & Qubits 101**: Fundamental concepts explaining superposition, quantum entanglement, and practical applications.
