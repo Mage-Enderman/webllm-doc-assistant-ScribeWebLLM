@@ -52,7 +52,7 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
     },
     {
       id: 'graph' as ActiveTab,
-      label: 'Mind Map',
+      label: 'Concept Map',
       icon: Network,
       badge: null,
       desc: 'Interactive concept graph',

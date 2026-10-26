@@ -291,7 +291,7 @@ export const ConceptGraphView: React.FC<ConceptGraphViewProps> = ({
             docId: doc.id,
             docTitle: doc.title,
             title: `AI Extracted Concepts: ${doc.title}`,
-            summary: 'Auto-extracted concept nodes for Mind Map',
+            summary: 'Auto-extracted concept nodes for Concept Map',
             keyConcepts: extractedConcepts,
             takeaways: [],
             studyQuestions: [],
@@ -592,7 +592,7 @@ export const ConceptGraphView: React.FC<ConceptGraphViewProps> = ({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                Concept Graph & Mind Map
+                Concept Map
               </h1>
               <span className="text-[10px] px-1.5 py-0.2 rounded-full font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 shrink-0">
                 {nodes.length} Nodes • {edges.length} Links

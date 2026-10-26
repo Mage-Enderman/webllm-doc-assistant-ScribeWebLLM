@@ -213,7 +213,7 @@ export const App: React.FC = () => {
   const currentModelObj = AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
+    <div className="h-screen max-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* Top Header */}
       <Header
         modelStatus={modelStatus}
@@ -234,7 +234,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main App Layout */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Knowledge Base Sidebar */}
         <Sidebar
           documents={documents}
