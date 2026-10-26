@@ -188,46 +188,202 @@ Structured Study Notes:`;
  * Creates prompt for automated quiz generation with robust JSON output
  */
 export function buildQuizGenerationPrompt(contextText: string, questionCount: number = 5): { system: string; user: string } {
-  const system = `You are an academic test maker. Create a ${questionCount}-question multiple-choice quiz based ONLY on the provided text.
-Every question must have 4 options (A, B, C, D) and exactly 1 correct answer.
-You MUST output valid JSON only, without markdown backticks or commentary.
+  const system = `You are a professional quiz maker. Generate a ${questionCount}-question multiple-choice quiz based ONLY on the provided text.
+CRITICAL FORMAT RULES:
+1. Output valid JSON array ONLY. No markdown code blocks, no conversational preamble.
+2. Every item MUST have:
+   - "question": string
+   - "options": array of 4 unique strings
+   - "correctIndex": integer (0, 1, 2, or 3) indicating which option is correct
+   - "explanation": string explaining why the answer is correct
+3. Do not use invalid backslash escapes in strings. Escape Windows paths with double backslashes.
 
-JSON format:
+Example output format:
 [
   {
-    "question": "What is...",
-    "options": ["Choice A", "Choice B", "Choice C", "Choice D"],
-    "correctIndex": 0,
-    "explanation": "Explanation why this is correct based on the text."
+    "question": "What is the primary function of...?",
+    "options": ["First choice", "Second choice", "Third choice", "Fourth choice"],
+    "correctIndex": 1,
+    "explanation": "Option 2 is correct because the text states..."
   }
 ]`;
 
-  const user = `Source Text:
+  const user = `Source Context:
 ${contextText}
 
-Create ${questionCount} multiple choice questions in valid JSON:`;
+Generate exactly ${questionCount} multiple choice questions in valid JSON:`;
 
   return { system, user };
 }
 
 /**
- * Robust JSON extraction helper that handles markdown code blocks or trailing commas from small models.
+ * Sanitizes JSON strings to fix common model output issues like:
+ * - Unescaped backslashes (e.g., "Memory\Available" -> "Memory\\Available")
+ * - Trailing commas
+ * - Markdown code block markers
+ */
+export function sanitizeJsonString(raw: string): string {
+  let cleaned = raw.trim();
+
+  // Strip markdown code fences (e.g. ```json ... ```)
+  cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+
+  // Fix unescaped backslashes that are not followed by valid JSON escape sequences: ", \, /, b, f, n, r, t, uXXXX
+  cleaned = cleaned.replace(/\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, '\\\\');
+
+  // Remove trailing commas before closing braces or brackets
+  cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+
+  return cleaned;
+}
+
+/**
+ * Bulletproof quiz parser that extracts complete questions even from partially truncated model outputs
+ */
+export function parseQuizQuestions(rawText: string): QuizQuestion[] {
+  const sanitized = sanitizeJsonString(rawText);
+
+  // 1. Try parsing full JSON array directly
+  try {
+    const parsed = JSON.parse(sanitized);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return normalizeQuizItems(parsed);
+    }
+  } catch {
+    // Continue to regex recovery
+  }
+
+  // 2. Try regex extraction of the array block [ ... ]
+  const arrayMatch = sanitized.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  if (arrayMatch) {
+    try {
+      const parsed = JSON.parse(sanitizeJsonString(arrayMatch[0]));
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return normalizeQuizItems(parsed);
+      }
+    } catch {
+      // Continue to progressive item recovery
+    }
+  }
+
+  // 3. Progressive recovery: Extract every completed individual question object { "question": ... }
+  const recoveredItems: any[] = [];
+  const objectRegex = /\{[\s\S]*?"question"\s*:\s*"([^"]+)"[\s\S]*?"options"\s*:\s*\[([\s\S]*?)\][\s\S]*?\}/g;
+  let match;
+
+  while ((match = objectRegex.exec(sanitized)) !== null) {
+    try {
+      const objStr = sanitizeJsonString(match[0]);
+      const obj = JSON.parse(objStr);
+      if (obj && obj.question && Array.isArray(obj.options)) {
+        recoveredItems.push(obj);
+      }
+    } catch {
+      // If full object parse fails, try extracting fields manually
+      try {
+        const qText = match[1];
+        const rawOptions = match[2];
+        const optMatches = Array.from(rawOptions.matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)).map((m) => m[1]);
+
+        if (qText && optMatches.length >= 2) {
+          // Check for correctIndex or correct_answer
+          let correctIndex = 0;
+          const idxMatch = match[0].match(/"correctIndex"\s*:\s*(\d+)/);
+          const ansMatch = match[0].match(/"correct_answer"\s*:\s*"([^"]+)"/);
+
+          if (idxMatch) {
+            correctIndex = parseInt(idxMatch[1], 10);
+          } else if (ansMatch) {
+            const ansText = ansMatch[1].trim().toLowerCase();
+            const foundIdx = optMatches.findIndex((o) => o.trim().toLowerCase() === ansText);
+            if (foundIdx !== -1) correctIndex = foundIdx;
+          }
+
+          recoveredItems.push({
+            question: qText,
+            options: optMatches,
+            correctIndex,
+            explanation: 'Based on the source documentation.',
+          });
+        }
+      } catch {
+        // Ignore unparseable snippet
+      }
+    }
+  }
+
+  if (recoveredItems.length > 0) {
+    return normalizeQuizItems(recoveredItems);
+  }
+
+  return [];
+}
+
+/**
+ * Normalizes question items from varied model formats:
+ * - Maps `correct_answer` or letter answers (A/B/C/D) to `correctIndex`
+ * - Ensures 4 options exist
+ * - Ensures explanation exists
+ */
+function normalizeQuizItems(rawItems: any[]): QuizQuestion[] {
+  return rawItems
+    .filter((item) => item && typeof item.question === 'string' && Array.isArray(item.options))
+    .map((item, idx) => {
+      const options: string[] = item.options.map((o: any) => String(o).trim());
+
+      let correctIndex = 0;
+      if (typeof item.correctIndex === 'number' && item.correctIndex >= 0 && item.correctIndex < options.length) {
+        correctIndex = item.correctIndex;
+      } else if (typeof item.correctIndex === 'string' && !isNaN(Number(item.correctIndex))) {
+        correctIndex = Number(item.correctIndex);
+      } else {
+        // Handle models outputting "correct_answer", "correctAnswer", or "answer"
+        const answerVal = String(item.correct_answer || item.correctAnswer || item.answer || '').trim();
+        if (answerVal) {
+          // Case 1: Letter answer "A", "B", "C", "D"
+          if (/^[A-Da-d]$/.test(answerVal)) {
+            correctIndex = answerVal.toUpperCase().charCodeAt(0) - 65;
+          } else {
+            // Case 2: Matching text
+            const foundIndex = options.findIndex(
+              (opt) => opt.toLowerCase() === answerVal.toLowerCase() || opt.toLowerCase().includes(answerVal.toLowerCase())
+            );
+            if (foundIndex !== -1) {
+              correctIndex = foundIndex;
+            }
+          }
+        }
+      }
+
+      // Safe clamp
+      if (correctIndex < 0 || correctIndex >= options.length) {
+        correctIndex = 0;
+      }
+
+      return {
+        id: `q_${Date.now()}_${idx}`,
+        question: item.question.trim(),
+        options: options.length >= 2 ? options : [...options, 'Option B', 'Option C', 'Option D'].slice(0, 4),
+        correctIndex,
+        explanation: item.explanation || 'Refer to the source documentation for full context.',
+      };
+    });
+}
+
+/**
+ * Generic JSON extractor for backward compatibility
  */
 export function extractJsonFromModelOutput<T>(rawText: string, fallback: T): T {
   try {
-    // 1. Try direct parse
-    return JSON.parse(rawText.trim());
+    const sanitized = sanitizeJsonString(rawText);
+    return JSON.parse(sanitized);
   } catch {
-    // 2. Try regex extraction of JSON block [ ... ] or { ... }
     const match = rawText.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
     if (match) {
       try {
-        const cleaned = match[1]
-          .replace(/,\s*([}\]])/g, '$1') // remove trailing commas
-          .trim();
-        return JSON.parse(cleaned);
+        return JSON.parse(sanitizeJsonString(match[1]));
       } catch (err) {
-        console.warn('Failed to parse extracted JSON match:', err, match[1]);
+        console.warn('Failed to parse extracted JSON match:', err);
       }
     }
   }

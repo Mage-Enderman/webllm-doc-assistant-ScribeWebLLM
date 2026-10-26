@@ -16,7 +16,7 @@ import { db } from '../../lib/db';
 import { llmEngine } from '../../lib/llm/engine';
 import {
   buildQuizGenerationPrompt,
-  extractJsonFromModelOutput,
+  parseQuizQuestions,
 } from '../../lib/rag/harness';
 
 interface QuizViewProps {
@@ -74,23 +74,14 @@ export const QuizView: React.FC<QuizViewProps> = ({
           { role: 'system', content: system },
           { role: 'user', content: user },
         ],
-        { temperature: 0.1, max_tokens: 1200 }
+        { temperature: 0.2, max_tokens: 2200 }
       );
 
-      const parsed = extractJsonFromModelOutput<QuizQuestion[]>(rawJson, []);
+      const validQuestions = parseQuizQuestions(rawJson);
 
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        throw new Error('Model produced invalid quiz JSON structure. Please retry.');
+      if (validQuestions.length === 0) {
+        throw new Error('Could not parse questions from model output. Please try again with fewer questions or a larger model.');
       }
-
-      // Sanitize and ensure 4 options exist
-      const validQuestions: QuizQuestion[] = parsed.map((q, idx) => ({
-        id: `q_${idx}`,
-        question: q.question || `Question ${idx + 1}`,
-        options: Array.isArray(q.options) && q.options.length >= 2 ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'],
-        correctIndex: typeof q.correctIndex === 'number' ? q.correctIndex : 0,
-        explanation: q.explanation || 'Refer to the source documentation for details.',
-      }));
 
       setQuestions(validQuestions);
     } catch (err: any) {
