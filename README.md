@@ -119,15 +119,26 @@ This app is 100% static client-side and includes a pre-configured GitHub Actions
 
 ---
 
-## 🧠 Supported WebLLM Models
+## 🧠 Supported AI Models
+
+### 1. Large Language Models (WebLLM via WebGPU)
 
 | Model | Parameters | Download Size | Recommended Device |
 | :--- | :--- | :--- | :--- |
 | **Qwen 2.5 (0.5B)** *(Default)* | 0.5 Billion | ~380 MB | Any laptop, tablet, or phone |
+| **Gemma 4 (E2B)** | 2.0B Effective | ~2.1 GB | High-speed edge reasoning with Per-Layer Embeddings |
+| **Gemma 4 (E4B)** | 4.0B Effective | ~3.8 GB | Flagship structured output, coding & technical reasoning |
 | **Llama 3.2 (1B)** | 1.2 Billion | ~880 MB | Standard laptops & desktops |
 | **Qwen 2.5 (1.5B)** | 1.5 Billion | ~1.2 GB | Modern laptops with dedicated/integrated GPU |
-| **SmolLM2 (1.7B)** | 1.7 Billion | ~1.3 GB | High instruction precision |
+| **SmolLM2 (1.7B)** | 1.7 Billion | ~1.3 GB | High instruction precision for study notes |
 | **Llama 3.2 (3B)** | 3.2 Billion | ~2.2 GB | Desktops or laptops with 4GB+ VRAM |
+
+### 2. Semantic Embedding Models (Client-Side RAG)
+
+| Model | Dimensions | Context Window | Best For |
+| :--- | :--- | :--- | :--- |
+| **EmbeddingGemma 2 (270M)** *(Default)* | 768D (MRL support) | 8,192 tokens | Text & Code retrieval, Google DeepMind unified vector space |
+| **all-MiniLM-L6-v2** | 384D | 512 tokens | Ultra-lightweight and fast indexing on low-spec hardware |
 
 *Note: Models are downloaded once and cached in your browser's `CacheStorage`. Subsequent visits start immediately without re-downloading.*
 
