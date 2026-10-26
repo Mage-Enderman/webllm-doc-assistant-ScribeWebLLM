@@ -116,6 +116,17 @@ export interface ModelOption {
   default?: boolean;
 }
 
+export interface EmbeddingModelOption {
+  id: string;
+  name: string;
+  dimensions: number;
+  modelPath: string;
+  contextWindow: number;
+  sizeLabel: string;
+  description: string;
+  isDefault?: boolean;
+}
+
 export interface ModelStatus {
   state: 'idle' | 'downloading' | 'compiling' | 'ready' | 'error';
   progress: number; // 0 to 1

@@ -12,6 +12,22 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     default: true,
   },
   {
+    id: 'gemma-4-E2B-it-q4f16_1-MLC',
+    name: 'Gemma 4 (E2B)',
+    vramMB: 3380,
+    sizeLabel: '~2.1 GB',
+    description: "Google DeepMind's edge-optimized Gemma 4 model with Per-Layer Embeddings (PLE).",
+    recommendedFor: 'Fast reasoning, multimodal & edge tasks',
+  },
+  {
+    id: 'gemma-4-E4B-it-q4f16_1-MLC',
+    name: 'Gemma 4 (E4B)',
+    vramMB: 4500,
+    sizeLabel: '~3.8 GB',
+    description: "Google DeepMind's flagship 4B effective parameter model with superior logic and code comprehension.",
+    recommendedFor: 'Complex technical documentation & deep analysis',
+  },
+  {
     id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
     name: 'Llama 3.2 (1B)',
     vramMB: 880,
@@ -44,6 +60,17 @@ export const AVAILABLE_MODELS: ModelOption[] = [
     recommendedFor: 'Machines with 4GB+ VRAM',
   },
 ];
+
+// Custom model definition fallback for Gemma 4 E4B
+const CUSTOM_GEMMA_4_E4B = {
+  model: 'https://huggingface.co/mlc-ai/gemma-4-E4B-it-q4f16_1-MLC',
+  model_id: 'gemma-4-E4B-it-q4f16_1-MLC',
+  model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_86/base/gemma-4-E2B-it-q4f16_1_cs512-webgpu.wasm',
+  vram_required_MB: 4500,
+  low_resource_required: false,
+  required_features: ['shader-f16'],
+  overrides: { context_window_size: 4096 },
+};
 
 export function isWebGPUSupported(): boolean {
   return typeof navigator !== 'undefined' && 'gpu' in navigator;
@@ -109,8 +136,8 @@ class LLMEngineManager {
         });
       }
 
-      this.engine = await CreateWebWorkerMLCEngine(this.worker, modelId, {
-        initProgressCallback: (report) => {
+      const options: any = {
+        initProgressCallback: (report: any) => {
           this.notifyStatus({
             state: report.progress >= 1 ? 'compiling' : 'downloading',
             progress: report.progress,
@@ -118,7 +145,15 @@ class LLMEngineManager {
             loadedModelId: modelId,
           });
         },
-      });
+      };
+
+      if (modelId === 'gemma-4-E4B-it-q4f16_1-MLC') {
+        options.appConfig = {
+          model_list: [CUSTOM_GEMMA_4_E4B],
+        };
+      }
+
+      this.engine = await CreateWebWorkerMLCEngine(this.worker, modelId, options);
 
       this.currentModelId = modelId;
       this.notifyStatus({

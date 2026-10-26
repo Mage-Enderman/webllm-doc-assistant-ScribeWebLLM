@@ -174,6 +174,9 @@ export const App: React.FC = () => {
         onLoadModel={handleInitializeModel}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
+        onEmbeddingModelChange={() => {
+          // Re-hydrate or notify
+        }}
       />
 
       {/* Model status / download progress banner */}

@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Search, Sparkles, FileText, Hash, CheckCircle2 } from 'lucide-react';
+import { Layers, Search, Sparkles, Hash, CheckCircle2, Database, ExternalLink } from 'lucide-react';
 import { ChunkItem, DocumentItem, SearchResult } from '../../lib/types';
 import { db } from '../../lib/db';
 import { globalRetriever } from '../../lib/rag/retriever';
+import {
+  AVAILABLE_EMBEDDING_MODELS,
+  getActiveEmbeddingModel,
+  setActiveEmbeddingModel,
+} from '../../lib/rag/embeddings';
 
 interface InspectorViewProps {
   documents: DocumentItem[];
@@ -13,6 +18,9 @@ export const InspectorView: React.FC<InspectorViewProps> = ({ documents }) => {
   const [testQuery, setTestQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [activeEmbModelId, setActiveEmbModelId] = useState(getActiveEmbeddingModel().id);
+
+  const activeModel = getActiveEmbeddingModel();
 
   useEffect(() => {
     loadChunks();
@@ -21,6 +29,11 @@ export const InspectorView: React.FC<InspectorViewProps> = ({ documents }) => {
   const loadChunks = async () => {
     const allChunks = await db.chunks.toArray();
     setChunks(allChunks);
+  };
+
+  const handleSwitchEmbeddingModel = (modelId: string) => {
+    setActiveEmbeddingModel(modelId);
+    setActiveEmbModelId(modelId);
   };
 
   const handleTestSearch = async (e: React.FormEvent) => {
@@ -41,18 +54,72 @@ export const InspectorView: React.FC<InspectorViewProps> = ({ documents }) => {
   return (
     <div className="flex-1 max-w-5xl mx-auto w-full p-4 space-y-6">
       {/* Overview Header */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-        <div className="flex items-center gap-2 mb-1">
-          <Layers className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">
-            RAG Chunk & Embedding Inspector
-          </h2>
-        </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Inspect how your documents are chunked, tokenized, and embedded. Test hybrid retrieval (Dense + BM25 via RRF) in real-time.
-        </p>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Layers className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                RAG Chunk & Embedding Inspector
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Inspect how your documents are chunked, tokenized, and embedded. Test hybrid retrieval (Dense + BM25 via RRF) in real-time.
+            </p>
+          </div>
 
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          {/* Embedding Model Selection */}
+          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+            <Database className="h-4 w-4 text-indigo-500 ml-1" />
+            <select
+              aria-label="Select Embedding Model"
+              value={activeEmbModelId}
+              onChange={(e) => handleSwitchEmbeddingModel(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none cursor-pointer pr-1"
+            >
+              {AVAILABLE_EMBEDDING_MODELS.map((emb) => (
+                <option key={emb.id} value={emb.id} className="dark:bg-slate-900">
+                  {emb.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Embedding Model Features Banner */}
+        <div className="p-3 bg-gradient-to-r from-indigo-50/70 via-purple-50/70 to-pink-50/70 dark:from-indigo-950/40 dark:via-purple-950/40 dark:to-pink-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="space-y-0.5">
+            <div className="font-semibold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
+              <span>{activeModel.name}</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-200/60 dark:bg-indigo-800/60 text-indigo-800 dark:text-indigo-200 font-mono">
+                {activeModel.dimensions}D Vector
+              </span>
+              {activeModel.id.includes('embeddinggemma') && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-medium">
+                  MRL Matryoshka
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-normal">
+              {activeModel.description}
+            </p>
+          </div>
+
+          {activeModel.id.includes('embeddinggemma') && (
+            <a
+              href="https://developers.googleblog.com/embeddinggemma-2-the-developer-guide/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0"
+            >
+              <span>Developer Guide</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
             <span className="text-slate-400 block text-[11px]">Total Documents</span>
             <span className="text-base font-bold text-slate-900 dark:text-white font-mono">
@@ -68,9 +135,9 @@ export const InspectorView: React.FC<InspectorViewProps> = ({ documents }) => {
           </div>
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-            <span className="text-slate-400 block text-[11px]">Vector Dimensions</span>
-            <span className="text-base font-bold text-slate-900 dark:text-white font-mono">
-              384 (all-MiniLM)
+            <span className="text-slate-400 block text-[11px]">Embedding Dimensions</span>
+            <span className="text-base font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+              {activeModel.dimensions}D Unified Space
             </span>
           </div>
 
@@ -173,7 +240,7 @@ export const InspectorView: React.FC<InspectorViewProps> = ({ documents }) => {
                       ~{chunk.tokenEstimate} tokens
                     </span>
                     <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 text-[10px]">
-                      <CheckCircle2 className="h-3 w-3" /> Vector 384D
+                      <CheckCircle2 className="h-3 w-3" /> Vector {chunk.embedding?.length || activeModel.dimensions}D
                     </span>
                   </div>
                 </div>

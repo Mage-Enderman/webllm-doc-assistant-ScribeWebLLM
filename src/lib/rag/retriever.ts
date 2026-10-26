@@ -84,7 +84,7 @@ export class HybridRetriever {
     });
 
     // 2. Dense Semantic Search via Vector Embeddings
-    const queryVector = await generateEmbedding(query);
+    const queryVector = await generateEmbedding(query, { isQuery: true });
     const denseScores: { chunk: ChunkItem; score: number }[] = [];
 
     for (const chunk of activeChunks) {

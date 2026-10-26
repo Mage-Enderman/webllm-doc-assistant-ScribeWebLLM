@@ -101,7 +101,7 @@ export async function processAndIngestDocument(
   });
 
   const textsToEmbed = chunks.map((c) => c.text);
-  const embeddings = await generateBatchEmbeddings(textsToEmbed, (cur, total) => {
+  const embeddings = await generateBatchEmbeddings(textsToEmbed, fileOrText.name, (cur, total) => {
     onProgress?.({
       stage: 'embedding',
       progress: 0.45 + (cur / total) * 0.45,
