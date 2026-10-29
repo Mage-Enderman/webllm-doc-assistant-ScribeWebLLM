@@ -1,34 +1,62 @@
 import React from 'react';
-import { Bot, Cpu, Moon, Sun, Sparkles, AlertCircle, CheckCircle2, Database } from 'lucide-react';
-import { AVAILABLE_MODELS, isWebGPUSupported } from '../lib/llm/engine';
+import {
+  Bot,
+  Cpu,
+  Moon,
+  Sun,
+  Sparkles,
+  AlertCircle,
+  CheckCircle2,
+  Database,
+  SlidersHorizontal,
+} from 'lucide-react';
+import { isWebGPUSupported } from '../lib/llm/engine';
 import {
   AVAILABLE_EMBEDDING_MODELS,
   getActiveEmbeddingModel,
   setActiveEmbeddingModel,
 } from '../lib/rag/embeddings';
-import { ModelStatus } from '../lib/types';
+import { LLMProvider, ModelOption, ModelStatus } from '../lib/types';
 
 interface HeaderProps {
   modelStatus: ModelStatus;
+  models: ModelOption[];
   selectedModelId: string;
   onSelectModel: (modelId: string) => void;
   onLoadModel: () => void;
+  onOpenModelSettings: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onEmbeddingModelChange?: (modelId: string) => void;
 }
 
+const MODEL_GROUPS: { provider: LLMProvider; label: string }[] = [
+  { provider: 'webllm', label: 'WebGPU · WebLLM' },
+  { provider: 'gguf', label: 'Local GGUF · llama.cpp' },
+  { provider: 'openai', label: 'Remote · OpenAI-compatible' },
+];
+
 export const Header: React.FC<HeaderProps> = ({
   modelStatus,
+  models,
   selectedModelId,
   onSelectModel,
   onLoadModel,
+  onOpenModelSettings,
   darkMode,
   onToggleDarkMode,
   onEmbeddingModelChange,
 }) => {
   const hasWebGPU = isWebGPUSupported();
   const activeEmbeddingModel = getActiveEmbeddingModel();
+  const activeModel = models.find((m) => m.id === selectedModelId);
+
+  const engineSubtitle =
+    activeModel?.provider === 'gguf'
+      ? 'Local GGUF • Runs via llama.cpp in your browser'
+      : activeModel?.provider === 'openai'
+      ? 'Connected to your own OpenAI-compatible endpoint'
+      : '100% In-Browser Private AI • Runs locally via WebGPU';
 
   const handleEmbeddingChange = (modelId: string) => {
     setActiveEmbeddingModel(modelId);
@@ -55,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
-              100% In-Browser Private AI • Runs locally via WebGPU
+              {engineSubtitle}
             </p>
           </div>
         </div>
@@ -106,12 +134,37 @@ export const Header: React.FC<HeaderProps> = ({
               disabled={modelStatus.state === 'downloading' || modelStatus.state === 'compiling'}
               className="bg-transparent text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-2 py-1 max-w-[170px] sm:max-w-none truncate"
             >
-              {AVAILABLE_MODELS.map((model) => (
-                <option key={model.id} value={model.id} className="dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                  {model.name} ({model.sizeLabel})
-                </option>
-              ))}
+              {MODEL_GROUPS.map((group) => {
+                const groupModels = models.filter((m) => m.provider === group.provider);
+                if (groupModels.length === 0) return null;
+                return (
+                  <optgroup
+                    key={group.provider}
+                    label={group.label}
+                    className="bg-white text-slate-500 dark:bg-slate-900 dark:text-slate-400 font-normal"
+                  >
+                    {groupModels.map((model) => (
+                      <option
+                        key={model.id}
+                        value={model.id}
+                        className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                      >
+                        {`${model.name} (${model.sizeLabel})`}
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
             </select>
+
+            <button
+              onClick={onOpenModelSettings}
+              className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              title="Add a GGUF model or connect an OpenAI-compatible API"
+              aria-label="Model settings"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+            </button>
 
             {modelStatus.state !== 'ready' ? (
               <button

@@ -126,6 +126,8 @@ export interface SummaryResult {
   createdAt: number;
 }
 
+export type LLMProvider = 'webllm' | 'gguf' | 'openai';
+
 export interface ModelOption {
   id: string;
   name: string;
@@ -134,6 +136,12 @@ export interface ModelOption {
   description: string;
   recommendedFor: string;
   default?: boolean;
+  /** Which inference backend serves this model. */
+  provider: LLMProvider;
+  /** Direct .gguf download URL for in-browser llama.cpp models. */
+  sourceUrl?: string;
+  /** Endpoint that serves this model, for auto-detected local servers. */
+  apiBaseUrl?: string;
 }
 
 export interface EmbeddingModelOption {
@@ -152,5 +160,7 @@ export interface ModelStatus {
   progress: number; // 0 to 1
   text: string;
   error?: string;
+  /** 'runtime' means the model is fine but this build cannot run it. */
+  errorKind?: 'runtime' | 'other';
   loadedModelId?: string;
 }

@@ -121,7 +121,9 @@ This app is 100% static client-side and includes a pre-configured GitHub Actions
 
 ## 🧠 Supported AI Models
 
-### 1. Large Language Models (WebLLM via WebGPU)
+The model picker in the header groups three sources: WebGPU/WebLLM models, GGUF models you add yourself and execute in-browser with llama.cpp, and OpenAI-compatible endpoints — either one you configure or ones detected running on this machine. The last two are optional: the app stays fully local with the built-in WebGPU models.
+
+### 1. Local models (WebGPU · WebLLM)
 
 | Model | Parameters | Download Size | Recommended Device |
 | :--- | :--- | :--- | :--- |
@@ -133,7 +135,25 @@ This app is 100% static client-side and includes a pre-configured GitHub Actions
 | **SmolLM2 (1.7B)** | 1.7 Billion | ~1.3 GB | High instruction precision for study notes |
 | **Llama 3.2 (3B)** | 3.2 Billion | ~2.2 GB | Desktops or laptops with 4GB+ VRAM |
 
-### 2. Semantic Embedding Models (Client-Side RAG)
+### 2. Local GGUF models (llama.cpp in the browser)
+
+Open **Model settings** (the sliders button next to the model picker) and supply **your own GGUF** model, either from disk or from a direct download URL. There are no built-in GGUF presets: the in-browser runtime can only run architectures its compiled llama.cpp knows, so you choose the file.
+
+GGUF models are executed by [llama.cpp compiled to WebAssembly (`wllama`)](https://github.com/ngxson/wllama). Downloads are cached by the browser, so the model loads instantly on later visits.
+
+> ⚠️ **New architectures need a newer runtime:** a GGUF whose architecture postdates the bundled llama.cpp build reports that clearly instead of failing silently. Run such models (for example Liquid AI's LFM3 family) through the OpenAI-compatible option below.
+
+### 3. Models hosted elsewhere (OpenAI-compatible API)
+
+Point the app at any endpoint that implements `/v1/chat/completions` — a local llama.cpp server, LM Studio, Ollama, vLLM, or a hosted provider:
+
+1. Open **Model settings**. Servers already running on this machine are detected automatically on the usual ports — **1234** (LM Studio), **8080** (llama.cpp), **11434** (Ollama) and **8000** (vLLM) — and their models can be picked directly there or from the header picker. Hit **Scan again** after starting or restarting a server.
+2. Or set the **base URL** (for example `http://localhost:8080/v1`), an optional **API key**, and the **model name** (use **Fetch** to list what the server exposes).
+3. Save, pick the model in the header, and click **Initialize**.
+
+The endpoint must allow cross-origin requests (CORS). Credentials live in this browser's `localStorage` and are only sent to the endpoint you configure. Auto-detected models keep using their own detected URL, so picking one never overwrites your saved endpoint.
+
+### 4. Semantic Embedding Models (Client-Side RAG)
 
 | Model | Dimensions | Context Window | Best For |
 | :--- | :--- | :--- | :--- |

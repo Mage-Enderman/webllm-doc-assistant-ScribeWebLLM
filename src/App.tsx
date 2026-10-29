@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { db, deleteDocumentWithChunks, deleteDocumentsWithChunks, clearAllData } from './lib/db';
 import { DocumentItem, ModelStatus } from './lib/types';
-import { AVAILABLE_MODELS, llmEngine } from './lib/llm/engine';
+import {
+  getAvailableModels,
+  getDefaultModelId,
+  llmEngine,
+  setDiscoveredServers,
+} from './lib/llm/engine';
+import { discoverLocalServers } from './lib/llm/discovery';
+import {
+  LLMSettings,
+  loadLLMSettings,
+  saveLLMSettings,
+} from './lib/llm/settings';
+import { ModelSettingsModal } from './components/ModelSettingsModal';
 import { globalRetriever } from './lib/rag/retriever';
 import { processAndIngestDocument, IngestionProgress } from './lib/ingestion/documentProcessor';
 import { SAMPLE_DOCUMENTS } from './lib/sampleDocs';
@@ -26,9 +38,15 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('chat');
   const [bundleModalOpen, setBundleModalOpen] = useState(false);
   const [chatInitialPrompt, setChatInitialPrompt] = useState<string | null>(null);
-  const [selectedModelId, setSelectedModelId] = useState<string>(
-    AVAILABLE_MODELS.find((m) => m.default)?.id || AVAILABLE_MODELS[0].id
-  );
+  const [llmSettings, setLlmSettings] = useState<LLMSettings>(() => loadLLMSettings());
+  const [models, setModels] = useState(() => getAvailableModels());
+  const [modelSettingsOpen, setModelSettingsOpen] = useState(false);
+  const [selectedModelId, setSelectedModelId] = useState<string>(() => {
+    const available = getAvailableModels();
+    const persisted = loadLLMSettings().selectedModelId;
+    if (persisted && available.some((m) => m.id === persisted)) return persisted;
+    return getDefaultModelId();
+  });
   const [modelStatus, setModelStatus] = useState<ModelStatus>(llmEngine.getStatus());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ingestionProgress, setIngestionProgress] = useState<IngestionProgress | null>(null);
@@ -64,6 +82,25 @@ export const App: React.FC = () => {
   // Load documents and hydrate hybrid retriever on mount
   useEffect(() => {
     loadDocumentsAndChunks();
+  }, []);
+
+  // Offer models from OpenAI-compatible servers already running on this machine
+  useEffect(() => {
+    let cancelled = false;
+    discoverLocalServers().then((servers) => {
+      if (cancelled) return;
+      setDiscoveredServers(servers);
+      const nextModels = getAvailableModels();
+      setModels(nextModels);
+      // A model selected from a detected server only resolves once discovery runs.
+      const persisted = loadLLMSettings().selectedModelId;
+      if (persisted && nextModels.some((m) => m.id === persisted)) {
+        setSelectedModelId(persisted);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const loadDocumentsAndChunks = async () => {
@@ -200,6 +237,10 @@ export const App: React.FC = () => {
 
   const handleModelSelect = async (modelId: string) => {
     setSelectedModelId(modelId);
+    const nextSettings = { ...loadLLMSettings(), selectedModelId: modelId };
+    saveLLMSettings(nextSettings);
+    setLlmSettings(nextSettings);
+
     // If a model is already loaded, switch to the new one
     if (modelStatus.state === 'ready') {
       try {
@@ -210,16 +251,33 @@ export const App: React.FC = () => {
     }
   };
 
-  const currentModelObj = AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
+  const handleSaveModelSettings = (next: LLMSettings) => {
+    saveLLMSettings(next);
+    setLlmSettings(next);
+
+    const nextModels = getAvailableModels();
+    setModels(nextModels);
+
+    if (!nextModels.some((m) => m.id === selectedModelId)) {
+      setSelectedModelId(getDefaultModelId());
+    }
+  };
+
+  const currentModelObj =
+    models.find((m) => m.id === selectedModelId) ||
+    models.find((m) => m.id === getDefaultModelId()) ||
+    models[0];
 
   return (
     <div className="h-screen max-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* Top Header */}
       <Header
         modelStatus={modelStatus}
+        models={models}
         selectedModelId={selectedModelId}
         onSelectModel={handleModelSelect}
         onLoadModel={handleInitializeModel}
+        onOpenModelSettings={() => setModelSettingsOpen(true)}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
         onEmbeddingModelChange={() => {
@@ -230,7 +288,8 @@ export const App: React.FC = () => {
       {/* Model status / download progress banner */}
       <ModelStatusBanner
         modelStatus={modelStatus}
-        selectedModelName={currentModelObj.name}
+        selectedModel={currentModelObj}
+        onOpenModelSettings={() => setModelSettingsOpen(true)}
       />
 
       {/* Main App Layout */}
@@ -351,6 +410,15 @@ export const App: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Model provider settings (GGUF / OpenAI-compatible) */}
+      {modelSettingsOpen && (
+        <ModelSettingsModal
+          onClose={() => setModelSettingsOpen(false)}
+          settings={llmSettings}
+          onSave={handleSaveModelSettings}
+        />
+      )}
 
       {/* Workspace Pack (.scribe) Export & Import Modal */}
       <BundleModal
